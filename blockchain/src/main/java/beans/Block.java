@@ -8,6 +8,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+
 /**
  * Block class represents the basic part of the blockchain
  *
@@ -16,20 +18,31 @@ import java.util.List;
  */
 public class Block implements Serializable {
 
-                                       
-    private String previousHash;
+    private int index;
     private long timestamp;
-    private String hash;
-    private int nonce;
     private List<Transaction> transactions = new ArrayList<Transaction>();
+    private int nonce;
+    private String hash;
+    private String previousHash;
+
+
 
     /*
      * todo:
      * Function that calculates the hash on the current block
      */
     public String calculateHash() throws Exception {
-
-        return "";
+        Gson parser = new Gson();
+        String jsonTransactions = parser.toJson(transactions);
+        String calculatedHash = StringUtil.applySha256(
+          Integer.toString(index) +
+          Long.toString(timestamp) +
+          jsonTransactions +
+          Integer.toString(nonce) +
+          hash +
+          previousHash
+        );
+        return calculatedHash;
     }
 
     /*
