@@ -1,8 +1,8 @@
 package beans;
 
-
 import entities.Blockchain;
 import entities.Transaction;
+import utilities.StringUtilities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -52,6 +52,31 @@ public class Block implements Serializable {
     public boolean addTransaction(Transaction transaction, Blockchain blockchain) {
 
         return true;
+    }
+
+    public String getHash()
+    {
+      return hash;
+    }
+
+    public boolean isValid(List<Block> blockchain){
+      boolean valid = true;
+
+      /* check current hash */
+      if (!hash.equals(calculateHash()))
+        valid = false;
+
+      /* check previous hash */
+      int i = blockchain.indexOf(this);
+      if (i != -1)
+      {
+        Block previousBlock = blockchain.get(i-1);
+        if (!previousHash.equals(previousBlock.getHash()))
+          valid = false;
+      }
+      else valid = false;
+
+      return valid;
     }
 
 }

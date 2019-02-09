@@ -21,6 +21,11 @@ public class Wallet implements Serializable {
      * Function generating a new Keypair of public and private key for this wallet
      */
     public void generateKeyPair() {
+      KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+      kpg.initialize(2048); /* key size */
+      Keypair kp = kpg.generateKeyPair();
+      privateKey = kp.getPrivate();
+      publicKey = kp.getPublic();
     }
 
 

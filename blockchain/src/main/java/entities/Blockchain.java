@@ -27,7 +27,15 @@ public class Blockchain implements Serializable {
      * @return True, if the blockchain is valid, else false
      */
     public boolean isValid() throws Exception {
-        return true;
+      Block currentBlock;
+
+      for(int i=1; i<blockchain.size(); i++)
+      {
+        currentBlock = blockchain.get(i);
+        if(!currentBlock.isValid(blockchain))
+          return false;
+      }
+      return true;
     }
 
 
