@@ -12,10 +12,16 @@ public class TransactionOutput implements Serializable {
     public float value; //the amount of coins they own
     public String parentTransactionId; //the id of the transaction this output was created in
 
+    public TransactionOutput(PublicKey reciepient, float value, String parentTransactionId) {
+      this.reciepient = reciepient;
+      this.value = value;
+      this.parentTransactionId = parentTransactionId;
+      this.id = StringUtilities.applySha256(StringUtilities.getStringFromKey(reciepient)+Float.toString(value)+parentTransactionId);
+	}
 
     //Check if coin belongs to you
     public boolean isMine(PublicKey publicKey) {
-        return true;
+        return (publicKey == reciepient);
     }
 
 
