@@ -1,5 +1,7 @@
 package beans;
 
+import java.util.Date;
+
 import entities.Blockchain;
 import entities.Transaction;
 import utilities.StringUtilities;
@@ -26,7 +28,13 @@ public class Block implements Serializable {
     private String previousHash;
 
 
-
+  //Block Constructor.  
+  	public Block(Block previousBlock) {
+  		this.index = previousBlock.index + 1;
+  		this.previousHash = previousBlock.hash;
+  		this.timeStamp = new Date().getTime();
+  		//this.hash = calculateHash(); //Making sure we do this after we set the other values.
+  	}
     /*
      * todo:
      * Function that calculates the hash on the current block
@@ -34,12 +42,11 @@ public class Block implements Serializable {
     public String calculateHash() throws Exception {
         Gson parser = new Gson();
         String jsonTransactions = parser.toJson(transactions);
-        String calculatedHash = StringUtil.applySha256(
+        String calculatedHash = StringUtilities.applySha256(
           Integer.toString(index) +
           Long.toString(timestamp) +
-          jsonTransactions +
+          jsonTransactions + 
           Integer.toString(nonce) +
-          hash +
           previousHash
         );
         return calculatedHash;
@@ -50,13 +57,38 @@ public class Block implements Serializable {
      * Function that adds a Transaction on the current block if it is valid
      */
     public boolean addTransaction(Transaction transaction, Blockchain blockchain) {
-
+    	if(transaction == null) return false;	
+    	if((previousHash != "0")) {
+	    	boolean success = transaction.processTransaction(blockchain);
+	    	if(success) {
+	    		transactions.add(transaction);
+	    		System.out.println("Transaction Successfully added to Block");
+	    	}
+	    	else {
+	    		System.out.println("Transaction failed to process. Discarded.");
+	    		return false;
+	    	}
+    	}
+    	/*if(transactions.size() == blockchain.getMaxTrans()) {
+    		int diff = blockchain.getDifficulty();
+    		//mineeeeeeer
+    		//mineBlock(this,diff);
+    	}*/
+    		
         return true;
     }
 
     public String getHash()
     {
       return hash;
+    }
+    
+    void setNonce(int nonce) {
+    	this.nonce = nonce;
+    }
+    
+    void setHash(int hash) {
+    	this.hash = hash;
     }
 
     public boolean isValid(List<Block> blockchain){

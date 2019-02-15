@@ -26,6 +26,15 @@ public class Blockchain implements Serializable {
      *
      * @return True, if the blockchain is valid, else false
      */
+	 
+	 public int getDifficulty() {
+    	return difficulty;
+    }
+    
+    public int getMaxTrans() {
+    	return maxTransactionInBlock;
+    }
+	 
     public boolean isValid() throws Exception {
       Block currentBlock;
 
