@@ -39,6 +39,7 @@ public class NodeMiner {
     	}
     	newBlock.setHash(hash);
     	System.out.println("Block Mined!!! : " + hash);
+    	broadcastBlock(newBlock);
     }
 
     /**
@@ -47,7 +48,9 @@ public class NodeMiner {
     public void initiliazeNetworkConnections()  {
     }
     
-    public void broadcastBlock()
+    public void broadcastBlock(Block block) {
+    	//?how to broadcast
+    }
 
     /**
      * Function adding a new transaction to blockchain
