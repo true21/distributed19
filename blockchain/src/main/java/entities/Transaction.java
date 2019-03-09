@@ -23,6 +23,29 @@ public class Transaction implements Serializable {
 
     private static int sequence = 0; // a rough count of how many transactions have been generated
 
+    public Transaction (PublicKey send, PublicKey rec, float val, ArrayList<TransactionInput> inp){
+      this.sender_address = send;
+      this.receiver_address = rec;
+      this.value = val;
+      this.transaction_inputs = inp;
+    }
+
+    public void setTransId(String tr){
+      this.transaction_id = tr;
+    }
+
+    public String getTransId(){
+      return this.transaction_id;
+    }
+
+    public void setTransOut(PublicKey rec, float val, String id){
+      this.transaction_outputs.add(new TransactionOutput(rec, val, id));
+    }
+
+    public ArrayList<TransactionOutput> getTransOut(){
+      return this.transaction_outputs;
+    }
+
     // This Calculates the transaction hash (which will be used as its Id)
     private String calulateHash() {
       sequence++;
@@ -43,7 +66,7 @@ public class Transaction implements Serializable {
 
     //Verifies the data we signed hasnt been tampered with
     public boolean verifiySignature() {
-      String data = StringUtil.getStringFromKey(sender_address) + StringUtilities.getStringFromKey(receiver_address) + Float.toString(value);
+      String data = StringUtilities.getStringFromKey(sender_address) + StringUtilities.getStringFromKey(receiver_address) + Float.toString(value);
       return StringUtilities.verifyECDSASig(sender_address, data, signature);
     }
 
@@ -57,30 +80,30 @@ public class Transaction implements Serializable {
 
       //gather transaction inputs (Make sure they are unspent):
       for(TransactionInput i : transaction_inputs) {
-        i.UTXO = blockchain.UTXOs.get(i.transactionOutputId);
+        i.UTXO = blockchain.getUTXOs().get(i.transactionOutputId);
       }
 
       //check if transaction is valid:
-      if(getInputsValue() < blockchain.minimumTransaction) {
+      if(getInputsValue() < blockchain.getMinimumTransaction()) {
         System.out.println("#Transaction Inputs to small: " + getInputsValue());
         return false;
       }
 
       //generate transaction outputs:
       float leftOver = getInputsValue() - value; //get value of inputs then the left over change:
-      transactionId = calulateHash();
-      outputs.add(new TransactionOutput( this.receiver_address, value,transactionId)); //send value to recipient
-      outputs.add(new TransactionOutput( this.sender_address, leftOver,transactionId)); //send the left over 'change' back to sender
+      transaction_id = calulateHash();
+      transaction_outputs.add(new TransactionOutput( this.receiver_address, value,transaction_id)); //send value to recipient
+      transaction_outputs.add(new TransactionOutput( this.sender_address, leftOver,transaction_id)); //send the left over 'change' back to sender
 
       //add outputs to Unspent list
       for(TransactionOutput o : transaction_outputs) {
-        blockchain.UTXOs.put(o.id , o);
+        blockchain.getUTXOs().put(o.id , o);
       }
 
       //remove transaction inputs from UTXO lists as spent:
       for(TransactionInput i : transaction_inputs) {
         if(i.UTXO == null) continue; //if Transaction can't be found skip it
-        blockchain.UTXOs.remove(i.UTXO.id);
+        blockchain.getUTXOs().remove(i.UTXO.id);
       }
 
       return true;

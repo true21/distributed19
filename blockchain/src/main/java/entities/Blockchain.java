@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Blockchain implements Serializable {
 
-    private List<Block> blockchain;
+    private List<Block> blockchain = new ArrayList<Block>();
     private int difficulty;
     private int maxTransactionInBlock;
     private HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
@@ -26,15 +26,34 @@ public class Blockchain implements Serializable {
      *
      * @return True, if the blockchain is valid, else false
      */
-	 
+
+   public float getMinimumTransaction() {
+     return this.minimumTransaction;
+   }
+
+   public void setUTXOs(String id, TransactionOutput out){
+      this.UTXOs.put(id,out);
+   }
+
+   public HashMap<String,TransactionOutput> getUTXOs() {
+     return this.UTXOs;
+   }
+
 	 public int getDifficulty() {
     	return difficulty;
     }
-    
+
     public int getMaxTrans() {
     	return maxTransactionInBlock;
     }
-	 
+
+    public void addBlock(Block newBlock, NodeMiner miner) {
+      if (!newBlock.getPreviousHash().equals("1")) {
+        miner.mineBlock(newBlock, difficulty);
+      }
+		  blockchain.add(newBlock);
+    }
+
     public boolean isValid() throws Exception {
       Block currentBlock;
 
@@ -44,6 +63,7 @@ public class Blockchain implements Serializable {
         if(!currentBlock.isValid(blockchain))
           return false;
         //check if hash is solved
+        String hashTarget = new String(new char[difficulty]).replace('\0', '0');
   			if(!currentBlock.hash.substring( 0, difficulty).equals(hashTarget)) {
           System.out.println("#This block hasn't been mined");
   				return false;

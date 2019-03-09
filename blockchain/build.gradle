@@ -1,1 +1,22 @@
 apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url "http://maven.restlet.org/"
+    }
+	
+	maven { 
+        url "https://jitpack.io"  /////
+    }
+	
+}
+
+dependencies {
+    compile "javax.json:javax.json-api:1.0"
+	compile "org.json:json:20171018"
+	compile "com.googlecode.json-simple:json-simple:1.1.1"
+    compile "com.google.code.gson:gson:2.8.2"                    //json library
+    
+}

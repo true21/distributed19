@@ -20,6 +20,10 @@ public class Wallet implements Serializable {
 	public PublicKey getPublicKey(){
 		return publicKey;
 	}
+
+  public PublicKey getPrivateKey(){
+    return privateKey;
+  }
     /**
      * Function generating a new Keypair of public and private key for this wallet
      */
@@ -65,7 +69,7 @@ public class Wallet implements Serializable {
      * @param allUTXOs
      * @return
      */
-    public Transaction sendFunds(PublicKey _recipient, float value, /*HashMap<String,TransactionOutput> allUTXOs*/) {
+    public Transaction sendFunds(PublicKey _recipient, float value/*HashMap<String,TransactionOutput> allUTXOs*/) {
       if(getBalance() < value) { //gather balance and check funds.
         System.out.println("#Not Enough funds to send transaction. Transaction Discarded.");
         return null;

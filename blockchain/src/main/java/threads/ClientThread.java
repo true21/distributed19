@@ -1,9 +1,9 @@
-//package threads;
+package threads;
 
-//import beans.Message;
-//import beans.MessageType;
-//import entities.NodeMiner;
-//import entities.Transaction;
+import beans.Message;
+import beans.MessageType;
+import entities.NodeMiner;
+import entities.Transaction;
 
 import javax.sound.sampled.LineEvent;
 import java.io.*;
@@ -93,19 +93,18 @@ public class ClientThread extends Thread {
 		}
 
   }
-/*
+
   /**
    * Add data to sent to a Message object
    * @return the Message
-   */ /*
+   */
   private Message createMessage() {
   	return null;
   }
 
   @Override
   public void run() {
-		//create new nodeminer , genesis block
-		System.out.println("AEK");
+
   }
-*/
+
 }

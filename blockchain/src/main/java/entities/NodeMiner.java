@@ -26,7 +26,7 @@ public class NodeMiner {
 	private InetAddress ipAddress;
 	private int port;
 	private Wallet wallet = new Wallet();
-	
+
 	public NodeMiner(int c, InetAddress i, int prt){
 		index = c;
 		ipAddress = i;
@@ -49,11 +49,11 @@ public class NodeMiner {
      * todo : utility to mine a new Block
      */
     public void mineBlock(Block newBlock, int diff) throws Exception {
-    	String target = new String();
+    	String target = new String("");
     	Random rand = new Random();
     	int rand_int1;
     	for(i=0;i<diff;i++)
-    		diff += "0";
+    		target += "0";
     	while(true) {
     		rand_int1 = rand.nextInt(2147483647); //or nonce++
         	newBlock.setNonce(rand_int1);
@@ -63,7 +63,7 @@ public class NodeMiner {
     	}
     	newBlock.setHash(hash);
     	System.out.println("Block Mined!!! : " + hash);
-    	broadcastBlock(newBlock);
+    	//broadcastBlock(newBlock);
     }
 
     /**

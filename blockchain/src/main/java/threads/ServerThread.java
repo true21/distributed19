@@ -1,8 +1,7 @@
 package threads;
 
-import beans.Message;
-import beans.MessageType;
-import entities.NodeMiner;
+import beans.*;
+import entities.*;
 import utilities.MessageUtilities;
 
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.InetAddress;
 import java.security.*;
+import java.util.*;
 
 public class ServerThread extends Thread {
 
@@ -24,7 +24,7 @@ public class ServerThread extends Thread {
     private InetAddress ipAddress;
     private Socket socket;
     private int port;
-    public final n = 5;
+    public final int n = 5;
 
     public ServerThread(Socket sock, String op, InetAddress ip, int prt){
   		socket = sock;
@@ -61,16 +61,27 @@ public class ServerThread extends Thread {
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
           			Node node3;
           			for (int i=0; i<n; i++) {
-          				node3 = (Node) objectInputStream.readObject();
+          				node3 = (Node) ois.readObject();
           				nodes.add(node3); //receive list by bootstrap
           			}
+                blockchain = (Blockchain) ois.readObject();
                 //t.start();
               }
               else {
                 // Bootstrap node here
-                
+                blockchain = new Blockchain();
                 Node node = new Node(0,ipAddress,port,miner.getWallet().getPublicKey());
                 nodes.add(node);
+                Wallet w = new Wallet();
+                w.generateKeyPair();
+                Transaction gen_trans = new Transaction(w.getPublicKey(), node.getPublicKey(), 100.0*n, null);
+                gen_trans.generateSignature(w.getPrivateKey());
+                gen_trans.setTransId("0");
+                gen_trans.setTransOut(node.getPublicKey(),100.0*n, gen_trans.getTransId());
+                blockchain.setUTXOs(gen_trans.getTransOut().get(0).getId(), gen_trans.getTransOut().get(0));
+                Block gen_block = new Block();
+                gen_block.addTransaction(gen_trans, blockchain);
+                blockchain.addBlock(gen_block, miner);
                 ServerSocket listener = new ServerSocket(10000);
                 List<Socket> sockets = new ArrayList<Socket>();
                 int c = 0;
@@ -98,6 +109,7 @@ public class ServerThread extends Thread {
             			for(i=0;i<nodes.size();i++){
             				oos.writeObject(nodes.get(i)); //broadcast list
             			}
+                  oos.writeObject(blockchain);
             			oos.close();
                 }
 

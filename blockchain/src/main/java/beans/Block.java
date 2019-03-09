@@ -20,7 +20,6 @@ import com.google.gson.Gson;
  */
 public class Block implements Serializable {
 
-    private int index;
     private long timestamp;
     private List<Transaction> transactions = new ArrayList<Transaction>();
     private int nonce;
@@ -28,11 +27,18 @@ public class Block implements Serializable {
     private String previousHash;
 
 
-  //Block Constructor.  
-  	public Block(Block previousBlock) {
-  		this.index = previousBlock.index + 1;
-  		this.previousHash = previousBlock.hash;
-  		this.timeStamp = new Date().getTime();
+    // constructor for genesis block
+    public Block() {
+      this.previousHash = "1";
+      this.nonce = 0;
+      this.timestamp = new Date().getTime();
+    }
+
+  //Block Constructor.
+  	public Block(String preHash) {
+  		this.previousHash = preHash;
+  		this.timestamp = new Date().getTime();
+
   		//this.hash = calculateHash(); //Making sure we do this after we set the other values.
   	}
     /*
@@ -45,7 +51,7 @@ public class Block implements Serializable {
         String calculatedHash = StringUtilities.applySha256(
           Integer.toString(index) +
           Long.toString(timestamp) +
-          jsonTransactions + 
+          jsonTransactions +
           Integer.toString(nonce) +
           previousHash
         );
@@ -57,12 +63,13 @@ public class Block implements Serializable {
      * Function that adds a Transaction on the current block if it is valid
      */
     public boolean addTransaction(Transaction transaction, Blockchain blockchain) {
-    	if(transaction == null) return false;	
-    	if((previousHash != "0")) {
+    	if(transaction == null) return false;
+    	if(!(previousHash.equals("1"))) {
 	    	boolean success = transaction.processTransaction(blockchain);
 	    	if(success) {
 	    		transactions.add(transaction);
 	    		System.out.println("Transaction Successfully added to Block");
+          return true;
 	    	}
 	    	else {
 	    		System.out.println("Transaction failed to process. Discarded.");
@@ -74,20 +81,26 @@ public class Block implements Serializable {
     		//mineeeeeeer
     		//mineBlock(this,diff);
     	}*/
-    		
-        return true;
+      transactions.add(transaction);
+      System.out.println("Transaction Successfully added to Genesis Block");
+      return true;
     }
 
     public String getHash()
     {
       return hash;
     }
-    
+
+    public String getPreviousHash()
+    {
+      return previousHash;
+    }
+
     void setNonce(int nonce) {
     	this.nonce = nonce;
     }
-    
-    void setHash(int hash) {
+
+    void setHash(String hash) {
     	this.hash = hash;
     }
 
