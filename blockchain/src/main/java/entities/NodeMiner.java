@@ -15,26 +15,50 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.net.InetAddress;
 
 /*
  * Class that represents a miner.
  */
 public class NodeMiner {
 
+	private int index;
+	private InetAddress ipAddress;
+	private int port;
+	private Wallet wallet = new Wallet();
+	
+	public NodeMiner(int c, InetAddress i, int prt){
+		index = c;
+		ipAddress = i;
+		port = prt;
+		wallet.generateKeyPair();
+	}
+
+	public int getIndex(){
+		return index;
+	}
+
+	public void setIndex(int idx){
+		index = idx;
+	}
+
+	public Wallet getWallet(){
+		return wallet;
+	}
     /*
      * todo : utility to mine a new Block
      */
     public void mineBlock(Block newBlock, int diff) throws Exception {
     	String target = new String();
-    	Random rand = new Random(); 
+    	Random rand = new Random();
     	int rand_int1;
     	for(i=0;i<diff;i++)
     		diff += "0";
     	while(true) {
-    		rand_int1 = rand.nextInt(2147483647); //or nonce++ 
+    		rand_int1 = rand.nextInt(2147483647); //or nonce++
         	newBlock.setNonce(rand_int1);
         	String hash = newBlock.calculateHash();
-        	if(hash.substring( 0, diff).equals(target))
+        	if(hash.substring(0, diff).equals(target))
         		return;
     	}
     	newBlock.setHash(hash);
@@ -47,7 +71,7 @@ public class NodeMiner {
      */
     public void initiliazeNetworkConnections()  {
     }
-    
+
     public void broadcastBlock(Block block) {
     	//?how to broadcast
     }

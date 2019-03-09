@@ -17,6 +17,9 @@ public class Wallet implements Serializable {
 
     public HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>(); //only UTXOs owned by this wallet.
 
+	public PublicKey getPublicKey(){
+		return publicKey;
+	}
     /**
      * Function generating a new Keypair of public and private key for this wallet
      */
