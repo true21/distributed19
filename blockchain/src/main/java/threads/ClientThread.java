@@ -14,14 +14,15 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Scanner;
+import java.security.*;
 
 public class ClientThread extends Thread {
 
-	private InetAddress ipAddress;
+	private static InetAddress ipAddress;
 	private static int index;
-	private Socket socket;
-	private int port;
-	public final int n = 5;
+	private static Socket socket;
+	private static int port;
+	public static final int n = 5;
 
 	public ClientThread(InetAddress i, int c, Socket sock, int prt) {
 		ipAddress = i;
@@ -32,23 +33,23 @@ public class ClientThread extends Thread {
 
 	// args[0] is index of client
 	public static void main(String[] args) throws IOException {
-
+		try{
 			index = Integer.parseInt(args[0]);
 
 			// get all nodes ids
 			ArrayList<Node> nodes = new ArrayList<Node>();
 			ServerSocket ss = new ServerSocket(7070 + index);
-      Socket s = ss.accept();
-			ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+      Socket s_nodeId = ss.accept();
+			ObjectInputStream ois = new ObjectInputStream(s_nodeId.getInputStream());
 			Node temp_node;
 			for (int i=0; i<n; i++) {
 				temp_node = (Node) ois.readObject();
 				nodes.add(temp_node);
 			}
-			s.close();
+			s_nodeId.close();
 			// check if you can connect to all servers
 			for (int i=0; i<nodes.size(); i++) {
-				Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+				Socket s_check = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
 			}
 			// now we're good to go
 			// socket
@@ -101,7 +102,6 @@ public class ClientThread extends Thread {
 					System.out.println(help);
 				}
 				else {
-					message Message = new Message();
 					if (cmd_args.size() == 3) {
 						int rec_id = Integer.parseInt(cmd_args.get(1).replace("ind", ""));
 						float value = Float.parseFloat(cmd_args.get(2));
@@ -109,15 +109,18 @@ public class ClientThread extends Thread {
 						PublicKey receiver_pk = nodes.get(rec_id).getPublicKey();
 						// we've got issue with last argument of constructor here
 						Transaction transaction = new Transaction(sender_pk, receiver_pk, value, null);
-						message.setType("transaction");
-						message.setTransaction(transaction);
+						Message message = new Message("transaction", transaction);
+						//message.setType("transaction");
+						//message.setTransaction(transaction);
 					}
 					else {
-						message.setType(cmd_args.get(0));
+						//message.setType(cmd_args.get(0));
+						Message message = new Message(cmd_args.get(0));
 					}
 
 				}
 			}
+		}  catch (Exception e) { e.printStackTrace();}
 
   }
 

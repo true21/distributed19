@@ -16,6 +16,10 @@ public class Message implements Serializable {
     this.transaction = trans;
   }
 
+  public Message (String typ) {
+    this.type = typ;
+  }
+
   public String getType() {
     return this.type;
   }
