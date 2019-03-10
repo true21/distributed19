@@ -21,6 +21,7 @@ public class ClientThread extends Thread {
 	private static int index;
 	private Socket socket;
 	private int port;
+	public final int n = 5;
 
 	public ClientThread(InetAddress i, int c, Socket sock, int prt) {
 		ipAddress = i;
@@ -29,9 +30,27 @@ public class ClientThread extends Thread {
 		port = prt;
 	}
 
+	// args[0] is index of client
 	public static void main(String[] args) throws IOException {
-    try {
 
+			index = Integer.parseInt(args[0]);
+
+			// get all nodes ids
+			ArrayList<Node> nodes = new ArrayList<Node>();
+			ServerSocket ss = new ServerSocket(7070 + index);
+      Socket s = ss.accept();
+			ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+			Node temp_node;
+			for (int i=0; i<n; i++) {
+				temp_node = (Node) ois.readObject();
+				nodes.add(temp_node);
+			}
+			s.close();
+			// check if you can connect to all servers
+			for (int i=0; i<nodes.size(); i++) {
+				Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+			}
+			// now we're good to go
 			// socket
 			InetAddress ip = InetAddress.getByName(args[0]);
 			Socket s = new Socket(ip, 9090 + index);
@@ -41,7 +60,7 @@ public class ClientThread extends Thread {
 			Scanner scanner = new Scanner(System.in);
 
 			// file
-			String file = "transactions" + index + ".txt";
+			String file = "../../resources/transactions/" + n + "nodes/transactions" + index + ".txt";
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line;
   		while ((line = br.readLine()) != null) {
@@ -82,15 +101,23 @@ public class ClientThread extends Thread {
 					System.out.println(help);
 				}
 				else {
-					System.out.println("Send to Server: " + sendToServer);
-					dos.writeUTF(sendToServer);
-					String received = dis.readUTF();
-          System.out.println(received);
+					message Message = new Message();
+					if (cmd_args.size() == 3) {
+						int rec_id = Integer.parseInt(cmd_args.get(1).replace("ind", ""));
+						float value = Float.parseFloat(cmd_args.get(2));
+						PublicKey sender_pk = nodes.get(index).getPublicKey();
+						PublicKey receiver_pk = nodes.get(rec_id).getPublicKey();
+						// we've got issue with last argument of constructor here
+						Transaction transaction = new Transaction(sender_pk, receiver_pk, value, null);
+						message.setType("transaction");
+						message.setTransaction(transaction);
+					}
+					else {
+						message.setType(cmd_args.get(0));
+					}
+
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
   }
 
