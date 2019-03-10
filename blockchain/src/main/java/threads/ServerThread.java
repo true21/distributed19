@@ -26,11 +26,14 @@ public class ServerThread extends Thread {
     private int port;
     public final int n = 5;
 
-    public ServerThread(Socket sock, String op, InetAddress ip, int prt){
-  		socket = sock;
-      operation = op;
-      ipAddress = ip;
-      port = prt;
+    public ServerThread(Socket sock, String op, InetAddress ip, int prt, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
+  		this.socket = sock;
+      this.operation = op;
+      this.ipAddress = ip;
+      this.port = prt;
+      this.blockchain = blockchain;
+      this.miner = miner;
+      this.nodes = nodes;
   	}
 
     public static void main(String[] args) throws IOException {
@@ -39,7 +42,7 @@ public class ServerThread extends Thread {
           try (ServerSocket listener = new ServerSocket(9090)) {
               Socket socket = listener.accept();
               System.out.println("Spawning thread for client communication");
-              Thread t = new ServerThread(socket, "client",InetAddress.getByName(args[0]),args[1]);
+              Thread t = new ServerThread(socket, "client", InetAddress.getByName(args[0]),args[1]);
               t.start();
               if (args[1]!=10000) {
                 Socket socket = new Socket(InetAddress.getByName(args[0]), 10000, InetAddress.getByName(args[0]), args[1]);
@@ -112,9 +115,18 @@ public class ServerThread extends Thread {
                   oos.writeObject(blockchain);
             			oos.close();
                 }
+            }
+            for(int i=0; i<n; i++){
+              if(i==miner.getIndex()) continue;
+              Thread t = new ServerThread(null, "client", InetAddress.getByName(args[0]), args[1], blockchain, miner, nodes);
+              t.start();
+            }
+            //list of sockets
+            for(int i=0; i<n; i++){
+              if(i==miner.getIndex()) continue;
+              Socket socket = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort(), InetAddress.getByName(args[0]), args[1]);
+            }
 
-
-              }
       }  catch (Exception e) { e.printStackTrace(); }
     }
 
@@ -127,6 +139,8 @@ public class ServerThread extends Thread {
 
     @Override
     public void run() {
+      ServerSocket listener = new ServerSocket(9090);
+      Socket socket = listener.accept();
       if(operation.equals("boot")) {
 
 

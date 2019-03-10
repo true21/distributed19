@@ -27,6 +27,14 @@ public class Node{
 		ip = i;
 	}
 
+	public InetAddress getIP(){
+		return this.ipAddress;
+	}
+
+	public int getIndex(){
+		return this.idx;
+	}
+
 	public void setPort(int i){
 		prt = i;
 	}
