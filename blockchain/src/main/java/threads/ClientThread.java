@@ -53,10 +53,7 @@ public class ClientThread extends Thread {
 			}
 			// now we're good to go
 			// socket
-			InetAddress ip = InetAddress.getByName(args[0]);
-			Socket s = new Socket(ip, 9090 + index);
-			DataInputStream dis = new DataInputStream(s.getInputStream());
-      DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+			InetAddress ip = nodes.get(index).getIP();
 			// get input from console
 			Scanner scanner = new Scanner(System.in);
 
@@ -65,13 +62,17 @@ public class ClientThread extends Thread {
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line;
   		while ((line = br.readLine()) != null) {
-				dos.writeUTF("t " + line.replace("id", ""));
-				String received = dis.readUTF();
-				System.out.println(received);
+				Socket s = new Socket(ip, 9090 + index);
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+				String toSend = "t " + line.replace("id", "");
+				Message message = new Message(toSend);
+				oos.writeObject(message);
   		}
 
 			// cli
 			while (true) {
+				Socket s = new Socket(ip, 9090 + index);
+				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				String sendToServer = new String("");
 				String help = "explain stuff";
 				String error = "Bad syntax.";
@@ -102,22 +103,8 @@ public class ClientThread extends Thread {
 					System.out.println(help);
 				}
 				else {
-					if (cmd_args.size() == 3) {
-						int rec_id = Integer.parseInt(cmd_args.get(1).replace("ind", ""));
-						float value = Float.parseFloat(cmd_args.get(2));
-						PublicKey sender_pk = nodes.get(index).getPublicKey();
-						PublicKey receiver_pk = nodes.get(rec_id).getPublicKey();
-						// we've got issue with last argument of constructor here
-						Transaction transaction = new Transaction(sender_pk, receiver_pk, value, null);
-						Message message = new Message("transaction", transaction);
-						//message.setType("transaction");
-						//message.setTransaction(transaction);
-					}
-					else {
-						//message.setType(cmd_args.get(0));
-						Message message = new Message(cmd_args.get(0));
-					}
-
+					Message message = new Message(sendToServer);
+					oos.writeObject(message);
 				}
 			}
 		}  catch (Exception e) { e.printStackTrace();}

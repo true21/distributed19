@@ -148,6 +148,14 @@ public class ServerThread extends Thread {
           ServerSocket ss_await = new ServerSocket(myPort);
           while (true) {
             Socket s_cli = ss_await.accept();
+            ObjectInputStream ois = new ObjectInputStream(s_cli.getInputStream());
+            Message message = (Message) ois.readObject();
+            if (message.getType().equals("this")) {
+              // do this
+            }
+            if (message.getType().equals("that")) {
+              // do that
+            }
           }
           /* for(int i=0; i<n; i++) {
               if(i == miner.getIndex()) continue;
@@ -167,7 +175,7 @@ public class ServerThread extends Thread {
      * Handle an incoming message
      * @param Message msg
      */
-    private void handleMessage(Message msg) {
+    private static void handleMessage(Message msg) {
     }
 
     @Override
