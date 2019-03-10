@@ -49,21 +49,24 @@ public class NodeMiner {
      * todo : utility to mine a new Block
      */
     public void mineBlock(Block newBlock, int diff) throws Exception {
-    	String target = new String("");
-    	Random rand = new Random();
-    	int rand_int1;
-    	for(i=0;i<diff;i++)
-    		target += "0";
-    	while(true) {
-    		rand_int1 = rand.nextInt(2147483647); //or nonce++
-        	newBlock.setNonce(rand_int1);
-        	String hash = newBlock.calculateHash();
-        	if(hash.substring(0, diff).equals(target))
-        		return;
-    	}
-    	newBlock.setHash(hash);
-    	System.out.println("Block Mined!!! : " + hash);
-    	//broadcastBlock(newBlock);
+			try{
+	    	String target = new String("");
+	    	Random rand = new Random();
+	    	int rand_int1;
+				String hash = new String("");
+	    	for(int i=0;i<diff;i++)
+	    		target += "0";
+	    	while(true) {
+	    		rand_int1 = rand.nextInt(2147483647); //or nonce++
+	        	newBlock.setNonce(rand_int1);
+	        	hash = newBlock.calculateHash();
+	        	if(hash.substring(0, diff).equals(target))
+	        		break;
+	    	}
+	    	newBlock.setHash(hash);
+	    	System.out.println("Block Mined!!! : " + hash);
+	    	//broadcastBlock(newBlock);
+			}  catch (Exception e) { e.printStackTrace();}
     }
 
     /**

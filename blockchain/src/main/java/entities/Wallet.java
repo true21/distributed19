@@ -21,7 +21,7 @@ public class Wallet implements Serializable {
 		return publicKey;
 	}
 
-  public PublicKey getPrivateKey(){
+  public PrivateKey getPrivateKey(){
     return privateKey;
   }
     /**
@@ -50,9 +50,21 @@ public class Wallet implements Serializable {
      * @param allUTXOs (unspent transactions)
      * @return the balance as float
      */
-    public float getBalance(HashMap<String,TransactionOutput> allUTXOs) {
+    /*public float getBalance(HashMap<String,TransactionOutput> allUTXOs) {
       float total = 0;
       for (Map.Entry<String, TransactionOutput> item: allUTXOs.entrySet()){
+        TransactionOutput UTXO = item.getValue();
+        if(UTXO.isMine(publicKey)) { //if output belongs to me ( if coins belong to me )
+          UTXOs.put(UTXO.id,UTXO); //add it to our list of unspent transactions.
+          total += UTXO.value ;
+        }
+      }
+      return total;
+    }*/
+
+    public float getBalance() {
+      float total = 0;
+      for (Map.Entry<String, TransactionOutput> item: Blockchain.getUTXOs().entrySet()){
         TransactionOutput UTXO = item.getValue();
         if(UTXO.isMine(publicKey)) { //if output belongs to me ( if coins belong to me )
           UTXOs.put(UTXO.id,UTXO); //add it to our list of unspent transactions.

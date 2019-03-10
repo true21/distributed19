@@ -38,6 +38,14 @@ public class Transaction implements Serializable {
       return this.transaction_id;
     }
 
+    public PublicKey getRecAddr(){
+      return this.receiver_address;
+    }
+
+    public PublicKey getSendAddr(){
+      return this.sender_address;
+    }
+
     public void setTransOut(PublicKey rec, float val, String id){
       this.transaction_outputs.add(new TransactionOutput(rec, val, id));
     }

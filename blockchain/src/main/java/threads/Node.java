@@ -10,7 +10,7 @@ public class Node{
 
 	public Node(int index, InetAddress i, int port, PublicKey key){
 		idx = index;
-		ipAddress = i;
+		ip = i;
 		prt = port;
 		publicKey = key;
 	}
@@ -28,11 +28,15 @@ public class Node{
 	}
 
 	public InetAddress getIP(){
-		return this.ipAddress;
+		return this.ip;
 	}
 
 	public int getIndex(){
 		return this.idx;
+	}
+
+	public PublicKey getPublicKey(){
+		return this.publicKey;
 	}
 
 	public void setPort(int i){

@@ -49,7 +49,6 @@ public class Block implements Serializable {
         Gson parser = new Gson();
         String jsonTransactions = parser.toJson(transactions);
         String calculatedHash = StringUtilities.applySha256(
-          Integer.toString(index) +
           Long.toString(timestamp) +
           jsonTransactions +
           Integer.toString(nonce) +
@@ -91,24 +90,30 @@ public class Block implements Serializable {
       return hash;
     }
 
+    public List<Transaction> getTrans()
+    {
+      return transactions;
+    }
+
     public String getPreviousHash()
     {
       return previousHash;
     }
 
-    void setNonce(int nonce) {
+    public void setNonce(int nonce) {
     	this.nonce = nonce;
     }
 
-    void setHash(String hash) {
+    public void setHash(String hash) {
     	this.hash = hash;
     }
 
-    public boolean isValid(List<Block> blockchain){
+  public boolean isValid(List<Block> blockchain){
+    try{
       boolean valid = true;
 
       /* check current hash */
-      if (!hash.equals(calculateHash()))
+      if (!(hash.equals(calculateHash())))
         valid = false;
 
       /* check previous hash */
@@ -116,12 +121,13 @@ public class Block implements Serializable {
       if (i != -1)
       {
         Block previousBlock = blockchain.get(i-1);
-        if (!previousHash.equals(previousBlock.getHash()))
+        if (!(previousHash.equals(previousBlock.getHash())))
           valid = false;
       }
       else valid = false;
 
       return valid;
-    }
+    }  catch (Exception e) { e.printStackTrace(); return false;}
+  }
 
 }

@@ -16,16 +16,9 @@ public class Blockchain implements Serializable {
     private List<Block> blockchain = new ArrayList<Block>();
     private int difficulty;
     private int maxTransactionInBlock;
-    private HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
+    // in order to compile static - else Wallet.getBalance() problematic
+    private static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>(); //static CAREFUUUUUUL
     private float minimumTransaction;
-
-
-    /**
-     * Method checking if the list of blocks contained in this object is
-     * creates a valid blockchain
-     *
-     * @return True, if the blockchain is valid, else false
-     */
 
    public float getMinimumTransaction() {
      return this.minimumTransaction;
@@ -35,8 +28,8 @@ public class Blockchain implements Serializable {
       this.UTXOs.put(id,out);
    }
 
-   public HashMap<String,TransactionOutput> getUTXOs() {
-     return this.UTXOs;
+   public static HashMap<String,TransactionOutput> getUTXOs() {
+     return UTXOs;
    }
 
 	 public int getDifficulty() {
@@ -48,11 +41,20 @@ public class Blockchain implements Serializable {
     }
 
     public void addBlock(Block newBlock, NodeMiner miner) {
-      if (!newBlock.getPreviousHash().equals("1")) {
-        miner.mineBlock(newBlock, difficulty);
-      }
-		  blockchain.add(newBlock);
+      try{
+        if (!newBlock.getPreviousHash().equals("1")) {
+          miner.mineBlock(newBlock, difficulty);
+        }
+  		  blockchain.add(newBlock);
+      }  catch (Exception e) { e.printStackTrace();}
     }
+
+    /**
+     * Method checking if the list of blocks contained in this object is
+     * creates a valid blockchain
+     *
+     * @return True, if the blockchain is valid, else false
+     */
 
     public boolean isValid() throws Exception {
       Block currentBlock;
@@ -64,15 +66,15 @@ public class Blockchain implements Serializable {
           return false;
         //check if hash is solved
         String hashTarget = new String(new char[difficulty]).replace('\0', '0');
-  			if(!currentBlock.hash.substring( 0, difficulty).equals(hashTarget)) {
+  			if(!currentBlock.getHash().substring( 0, difficulty).equals(hashTarget)) {
           System.out.println("#This block hasn't been mined");
   				return false;
   			}
 
         //loop thru blockchains transactions:
         TransactionOutput tempOutput;
-        for(int t=0; t <currentBlock.transactions.size(); t++) {
-          Transaction currentTransaction = currentBlock.transactions.get(t);
+        for(int t=0; t <currentBlock.getTrans().size(); t++) {
+          Transaction currentTransaction = currentBlock.getTrans().get(t);
 
           if(!currentTransaction.verifiySignature()) {
             System.out.println("#Signature on Transaction(" + t + ") is Invalid");
@@ -84,7 +86,7 @@ public class Blockchain implements Serializable {
           }
 
           for(TransactionInput input: currentTransaction.transaction_inputs) {
-            tempOutput = tempUTXOs.get(input.transactionOutputId);
+            tempOutput = UTXOs.get(input.transactionOutputId);
 
             if(tempOutput == null) {
               System.out.println("#Referenced input on Transaction(" + t + ") is Missing");
@@ -96,18 +98,18 @@ public class Blockchain implements Serializable {
               return false;
             }
 
-            tempUTXOs.remove(input.transactionOutputId);
+            UTXOs.remove(input.transactionOutputId);
           }
 
           for(TransactionOutput output: currentTransaction.transaction_outputs) {
-            tempUTXOs.put(output.id, output);
+            UTXOs.put(output.id, output);
           }
 
-          if( currentTransaction.outputs.get(0).reciepient != currentTransaction.receiver_address) {
+          if( currentTransaction.getTransOut().get(0).reciepient != currentTransaction.getRecAddr()) {
             System.out.println("#Transaction(" + t + ") output reciepient is not who it should be");
             return false;
           }
-          if( currentTransaction.outputs.get(1).reciepient != currentTransaction.sender_address) {
+          if( currentTransaction.getTransOut().get(1).reciepient != currentTransaction.getSendAddr()) {
             System.out.println("#Transaction(" + t + ") output 'change' is not sender.");
             return false;
           }
