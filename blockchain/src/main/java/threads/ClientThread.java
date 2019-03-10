@@ -105,6 +105,12 @@ public class ClientThread extends Thread {
 				else {
 					Message message = new Message(sendToServer);
 					oos.writeObject(message);
+					ois = new ObjectInputStream(s.getInputStream());
+					if (sendToServer.equals("balance")) {
+						float balance = ois.readFloat();
+						System.out.println("Your wallet's balance is: " + balance + " noobcash coins.");
+						s.close();
+					}
 				}
 			}
 		}  catch (Exception e) { e.printStackTrace();}

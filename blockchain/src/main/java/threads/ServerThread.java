@@ -150,6 +150,10 @@ public class ServerThread extends Thread {
             Socket s_cli = ss_await.accept();
             ObjectInputStream ois = new ObjectInputStream(s_cli.getInputStream());
             Message message = (Message) ois.readObject();
+            if (message.getType().equals("balance")) {
+              oos = new ObjectOutputStream(s_cli.getOutputStream());
+              oos.writeFloat(miner.getWallet().getBalance());
+            }
             if (message.getType().equals("this")) {
               // do this
             }
