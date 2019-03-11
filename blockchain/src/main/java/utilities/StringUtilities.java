@@ -37,7 +37,8 @@ public class StringUtilities {
       Signature dsa;
       byte[] output = new byte[0];
       try {
-        dsa = Signature.getInstance("ECDSA", "BC");
+        dsa = Signature.getInstance("DSA", "SUN");
+        //dsa = Signature.getInstance("ECDSA", "BC");
         dsa.initSign(privateKey);
         byte[] strByte = input.getBytes();
         dsa.update(strByte);
@@ -53,7 +54,8 @@ public class StringUtilities {
     //Verifies a String signature
     public static boolean verifyECDSASig(PublicKey publicKey, String data, byte[] signature) {
       try {
-        Signature ecdsaVerify = Signature.getInstance("ECDSA", "BC");
+        //Signature ecdsaVerify = Signature.getInstance("ECDSA", "BC");
+        Signature ecdsaVerify = Signature.getInstance("DSA", "SUN");
         ecdsaVerify.initVerify(publicKey);
         ecdsaVerify.update(data.getBytes());
           return ecdsaVerify.verify(signature);

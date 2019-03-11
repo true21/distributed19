@@ -1,8 +1,10 @@
 package threads;
 import java.net.InetAddress;
 import java.security.*;
+import java.io.Serializable;
 
-public class Node{
+
+public class Node implements Serializable{
 	private int idx;
 	private InetAddress ip;
 	private int prt;

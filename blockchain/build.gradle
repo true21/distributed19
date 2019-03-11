@@ -18,5 +18,5 @@ dependencies {
 	compile "org.json:json:20171018"
 	compile "com.googlecode.json-simple:json-simple:1.1.1"
     compile "com.google.code.gson:gson:2.8.2"                    //json library
-    
+    compile "org.bouncycastle:bcpkix-jdk15on:1.58"
 }

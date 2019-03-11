@@ -29,7 +29,24 @@ public class Wallet implements Serializable {
      */
     public void generateKeyPair() {
       try {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA","BC");
+        //System.out.println("it's me");
+        //Security.addProvider(new BouncyCastleProvider());
+        /* Provider[] provs = Security.getProviders();
+        for(int i=0; i<provs.length;i++){
+            System.out.println(provs[i]);
+        }*/
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA", "SUN");
+
+        // Initialize KeyPairGenerator.
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+        keyGen.initialize(1024, random);
+
+        // Generate Key Pairs, a private key and a public key.
+        KeyPair keyPair = keyGen.generateKeyPair();
+        privateKey = keyPair.getPrivate();
+        publicKey = keyPair.getPublic();
+        /*KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA","BC");
+        System.out.println("it's you");
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         ECGenParameterSpec ecSpec = new ECGenParameterSpec("prime192v1");
         // Initialize the key generator and generate a KeyPair
@@ -37,7 +54,7 @@ public class Wallet implements Serializable {
         KeyPair keyPair = keyGen.generateKeyPair();
         // Set the public and private keys from the keyPair
         privateKey = keyPair.getPrivate();
-        publicKey = keyPair.getPublic();
+        publicKey = keyPair.getPublic(); */
 		    }
         catch(Exception e) {
           throw new RuntimeException(e);

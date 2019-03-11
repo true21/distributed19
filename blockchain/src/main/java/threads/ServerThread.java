@@ -70,11 +70,11 @@ public class ServerThread extends Thread {
       			node.setKey(miner.getWallet().getPublicKey());*/
             // new node sends its identification
       			objectOutputStream.writeObject(node);
-      			objectOutputStream.close();
-      			InputStream inputstream = new ObjectInputStream(socket.getInputStream());
+      			//objectOutputStream.close();
+      			ObjectInputStream inputstream = new ObjectInputStream(socket.getInputStream());
             // new node sets its id, sent by bootstrap
-      			miner.setIndex(inputstream.read());
-      			inputstream.close();
+      			miner.setIndex(inputstream.readInt());
+      			//inputstream.close();
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
       			Node node3;
       			for (int i=0; i<n; i++) {
@@ -82,7 +82,7 @@ public class ServerThread extends Thread {
       				nodes.add(node3); //receive list by bootstrap
       			}
             blockchain = (Blockchain) ois.readObject();
-            ois.close();
+            //ois.close();
             //t.start();
           }
           else {
@@ -102,7 +102,7 @@ public class ServerThread extends Thread {
             blockchain.addBlock(gen_block, miner);
             ServerSocket listener = new ServerSocket(10000);
             List<Socket> sockets = new ArrayList<Socket>();
-            int c = 0;
+            int c = 1; // mallon
             while (c<n) {
                 Socket socket_boot = listener.accept();
                 sockets.add(socket_boot);
@@ -116,10 +116,10 @@ public class ServerThread extends Thread {
                 node2.setIndex(nodes.size());
                 nodes.add(node2);
                 // bootstrap receives node's id, adds it to list and sends his index
-                OutputStream output = new ObjectOutputStream(socket_boot.getOutputStream());
-                output.write(node2.getIndex());
-                output.close();
-                objectInputStream.close();
+                ObjectOutputStream output = new ObjectOutputStream(socket_boot.getOutputStream());
+                output.writeInt(node2.getIndex());
+                //output.close();
+                //objectInputStream.close();
                 //t.start();
                 c++;
             }
@@ -130,7 +130,7 @@ public class ServerThread extends Thread {
         				oos.writeObject(nodes.get(i));
         			}
               oos.writeObject(blockchain);
-        			oos.close();
+        			//oos.close();
             }
             // send 100 noobcash coins to each of the others
             /*Block block;
@@ -160,7 +160,7 @@ public class ServerThread extends Thread {
           ServerSocket ss = new ServerSocket(myPort);
           for (int i=0; i<n; i++) {
             Socket s = ss.accept();
-            s.close();
+            //s.close();
           }
           // connections done (let's hope so)
 
@@ -172,7 +172,7 @@ public class ServerThread extends Thread {
               Socket s100 = new Socket(myIp, myPort);
               oos = new ObjectOutputStream(s100.getOutputStream());
               oos.writeObject(mes);
-              oos.close();
+              //oos.close();
             }
 
           }
@@ -215,7 +215,7 @@ public class ServerThread extends Thread {
                   Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
                   oos = new ObjectOutputStream(s.getOutputStream());
                   oos.writeObject(msg);
-                  oos.close();
+                  //oos.close();
                 }
                 return_msg = "Transaction was completed successfully.";
               }
@@ -299,7 +299,7 @@ public class ServerThread extends Thread {
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
             Message msg = new Message("block", myBlock);
             oos.writeObject(msg);
-            oos.close();
+            //oos.close();
           }
         }
       }  catch (Exception e) { e.printStackTrace();}
