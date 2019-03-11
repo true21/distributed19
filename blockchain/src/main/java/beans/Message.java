@@ -8,8 +8,10 @@ import entities.*;
  */
 public class Message implements Serializable {
 
-  public String type;
-  public Transaction transaction;
+  private String type;
+  private Transaction transaction;
+  private Block block;
+
 
   public Message (String typ, Transaction trans) {
     this.type = typ;

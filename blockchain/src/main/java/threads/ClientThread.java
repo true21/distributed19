@@ -113,6 +113,9 @@ public class ClientThread extends Thread {
 					}
 					else if (sendToServer.equals("view")) {
 						// view
+						String view = (String) ois.readObject();
+						System.out.println("The last blocks' transactions are:" + view);
+						s.close();
 					}
 					else {
 						// transaction

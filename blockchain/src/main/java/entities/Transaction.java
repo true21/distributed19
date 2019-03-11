@@ -38,6 +38,10 @@ public class Transaction implements Serializable {
       return this.transaction_id;
     }
 
+    public float getValue(){
+      return this.value;
+    }
+
     public PublicKey getRecAddr(){
       return this.receiver_address;
     }

@@ -184,6 +184,13 @@ public class ServerThread extends Thread {
             }
             if (message.getType().equals("view")) {
               // do view
+              Block last = blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1);
+              String view = new String("");
+              for(int i=0; i<last.getTrans().size(); i++){
+                view += "From: " + last.getTrans(i).getSendAddr() + "  To: " + last.getTrans(i).getRecAddr() + "  Value: " + last.getTrans(i).getValue() + "\n" ;
+              }
+              oos = new ObjectOutputStream(s_cli.getOutputStream());
+              oos.writeObject(view);
             }
             if (message.getType().startsWith("t ")) {
               String[] parts = message.getType().split(" ");
