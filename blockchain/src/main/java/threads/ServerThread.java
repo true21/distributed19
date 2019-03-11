@@ -186,7 +186,13 @@ public class ServerThread extends Thread {
               // do view
             }
             if (message.getType().startsWith("t ")) {
-              // do this
+              String[] parts = message.getType().split(" ");
+              String id_str = parts[1];
+              String value_str = parts[2];
+              int id = Integer.parseInt(id_str);
+              float value = Float.parseFloat(value_str);
+              Transaction tran = miner.getWallet().sendFunds(nodes.get(id).getPublicKey(), value);
+              // now check if it is null or not
             }
             if (message.getType().equals("this")) {
               // do this
