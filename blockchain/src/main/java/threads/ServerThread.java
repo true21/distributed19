@@ -48,7 +48,6 @@ public class ServerThread extends Thread {
     // boot node has port 10000
     public static void main(String[] args) throws IOException {
       try{
-          //Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
           System.out.println("Server is running");
           InetAddress myIp = InetAddress.getByName(args[0]);
           int myPort = Integer.parseInt(args[1]);
@@ -228,6 +227,9 @@ public class ServerThread extends Thread {
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
                 Thread t = new ServerThread(block, blockchain, miner, nodes);
                 t.start();
+                // create new block with invalid previous hash
+                // gonna fix it when its previous enters blockchain
+                block = new Block("21");
               }
             }
             else if (message.getType().equals("block")) {
@@ -235,8 +237,11 @@ public class ServerThread extends Thread {
               blockchain.getBlockchain().add(message.getBlock());
               boolean isValid = blockchain.isValid();
               if (!isValid) {
-                blockchain.getBlockchain().remove(blockchain.getBlockchain().size() - 1);
+                blockchain.getBlockchain().remove(blockchain.getBlockchain().size()-1);
                 // consensus
+              }
+              else {
+                  block.setPreviousHash(message.getBlock().getHash());
               }
             }
             else if (message.getType().equals("this")) {

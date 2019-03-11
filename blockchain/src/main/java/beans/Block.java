@@ -100,6 +100,10 @@ public class Block implements Serializable {
       return previousHash;
     }
 
+    public void setPreviousHash(String pHash) {
+    	this.previousHash = pHash;
+    }
+
     public void setNonce(int nonce) {
     	this.nonce = nonce;
     }
