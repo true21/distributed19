@@ -14,8 +14,8 @@ import java.util.List;
 public class Blockchain implements Serializable {
 
     private List<Block> blockchain = new ArrayList<Block>();
-    private int difficulty;
-    private int maxTransactionInBlock;
+    private int difficulty = 4;
+    private int maxTransactionInBlock = 5;
     // in order to compile static - else Wallet.getBalance() problematic
     private static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>(); //static CAREFUUUUUUL
     private float minimumTransaction;

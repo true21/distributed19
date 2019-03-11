@@ -30,7 +30,7 @@ public class ServerThread extends Thread {
     private static InetAddress ipAddress;
     //private static Socket socket;
     private static int port;
-    private static final int n = 5;
+    private static final int n = 2;
 
     public ServerThread(/*Socket sock, String op, InetAddress ip, int prt, */Block block, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
   		//this.socket = sock;
@@ -48,6 +48,7 @@ public class ServerThread extends Thread {
     // boot node has port 10000
     public static void main(String[] args) throws IOException {
       try{
+          //Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
           System.out.println("Server is running");
           InetAddress myIp = InetAddress.getByName(args[0]);
           int myPort = Integer.parseInt(args[1]);
@@ -188,7 +189,7 @@ public class ServerThread extends Thread {
               oos = new ObjectOutputStream(s_cli.getOutputStream());
               oos.writeFloat(miner.getWallet().getBalance());
             }
-            if (message.getType().equals("view")) {
+            else if (message.getType().equals("view")) {
               // do view
               Block last = blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1);
               String view = new String("");
@@ -198,7 +199,7 @@ public class ServerThread extends Thread {
               oos = new ObjectOutputStream(s_cli.getOutputStream());
               oos.writeObject(view);
             }
-            if (message.getType().startsWith("t ")) {
+            else if (message.getType().startsWith("t ")) {
               String[] parts = message.getType().split(" ");
               String id_str = parts[1];
               String value_str = parts[2];
@@ -208,24 +209,28 @@ public class ServerThread extends Thread {
               String return_msg;
               if (tran == null) {
                 return_msg = "You don't have enough coins for the transaction.";
-                continue;
               }
-              Message msg = new Message("transaction", tran);
-              for (int i=0; i<nodes.size(); i++) {
-                Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
-                oos = new ObjectOutputStream(s.getOutputStream());
-                oos.writeObject(msg);
-                oos.close();
+              else {
+                Message msg = new Message("transaction", tran);
+                for (int i=0; i<nodes.size(); i++) {
+                  Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+                  oos = new ObjectOutputStream(s.getOutputStream());
+                  oos.writeObject(msg);
+                  oos.close();
+                }
+                return_msg = "Transaction was completed successfully.";
               }
+              oos = new ObjectOutputStream(s_cli.getOutputStream());
+              oos.writeObject(return_msg);
             }
-            if (message.getType().equals("transaction")) {
+            else if (message.getType().equals("transaction")) {
               block.addTransaction(message.getTransaction(), blockchain);
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
                 Thread t = new ServerThread(block, blockchain, miner, nodes);
                 t.start();
               }
             }
-            if (message.getType().equals("block")) {
+            else if (message.getType().equals("block")) {
               keepGoing = false;
               blockchain.getBlockchain().add(message.getBlock());
               boolean isValid = blockchain.isValid();
@@ -234,10 +239,10 @@ public class ServerThread extends Thread {
                 // consensus
               }
             }
-            if (message.getType().equals("this")) {
+            else if (message.getType().equals("this")) {
               // do this
             }
-            if (message.getType().equals("that")) {
+            else if (message.getType().equals("that")) {
               // do that
             }
           }

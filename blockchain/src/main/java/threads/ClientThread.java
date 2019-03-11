@@ -22,7 +22,7 @@ public class ClientThread extends Thread {
 	private static int index;
 	private static Socket socket;
 	private static int port;
-	public static final int n = 5;
+	public static final int n = 2;
 
 	public ClientThread(InetAddress i, int c, Socket sock, int prt) {
 		ipAddress = i;
@@ -107,6 +107,7 @@ public class ClientThread extends Thread {
 					oos.writeObject(message);
 					ois = new ObjectInputStream(s.getInputStream());
 					if (sendToServer.equals("balance")) {
+						// balance
 						float balance = ois.readFloat();
 						System.out.println("Your wallet's balance is: " + balance + " noobcash coins.");
 						s.close();
@@ -119,6 +120,9 @@ public class ClientThread extends Thread {
 					}
 					else {
 						// transaction
+						String transMsg = (String) ois.readObject();
+						System.out.println(transMsg);
+						s.close();
 					}
 				}
 			}
