@@ -111,6 +111,12 @@ public class ClientThread extends Thread {
 						System.out.println("Your wallet's balance is: " + balance + " noobcash coins.");
 						s.close();
 					}
+					else if (sendToServer.equals("view")) {
+						// view
+					}
+					else {
+						// transaction
+					}
 				}
 			}
 		}  catch (Exception e) { e.printStackTrace();}
