@@ -18,6 +18,11 @@ public class Message implements Serializable {
     this.transaction = trans;
   }
 
+  public Message (String typ, Block blo) {
+    this.type = typ;
+    this.block = blo;
+  }
+
   public Message (String typ) {
     this.type = typ;
   }
@@ -36,6 +41,10 @@ public class Message implements Serializable {
 
   public void setTransaction(Transaction trans) {
     this.transaction = trans;
+  }
+
+  public Block getBlock() {
+    return this.block;
   }
 
 }

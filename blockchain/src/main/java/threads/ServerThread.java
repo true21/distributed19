@@ -19,21 +19,26 @@ import java.util.*;
 
 public class ServerThread extends Thread {
 
-    public static Blockchain blockchain;
+    private static volatile boolean keepGoing = true;
+
+    private Block myBlock;
+    private static Blockchain blockchain;
     private static NodeMiner miner;
   	private static ArrayList<Node> nodes = new ArrayList<Node>();
-    private int index;
-    private String operation;
+    //private int index;
+    //private String operation;
     private static InetAddress ipAddress;
-    private static Socket socket;
+    //private static Socket socket;
     private static int port;
-    public static final int n = 5;
+    private static final int n = 5;
 
-    public ServerThread(Socket sock, String op, InetAddress ip, int prt, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
-  		this.socket = sock;
-      this.operation = op;
-      this.ipAddress = ip;
-      this.port = prt;
+    public ServerThread(/*Socket sock, String op, InetAddress ip, int prt, */Block block, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
+  		//this.socket = sock;
+      //this.operation = op;
+      //this.ipAddress = ip;
+      //this.port = prt;
+      this.myBlock = block;
+      this.keepGoing = true;
       this.blockchain = blockchain;
       this.miner = miner;
       this.nodes = nodes;
@@ -172,6 +177,7 @@ public class ServerThread extends Thread {
 
           }
 
+          Block block = new Block(blockchain.getBlockchain().get(0).getHash());
           // now server waits to receive (transactions, blocks, etc)
           ServerSocket ss_await = new ServerSocket(myPort);
           while (true) {
@@ -187,7 +193,7 @@ public class ServerThread extends Thread {
               Block last = blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1);
               String view = new String("");
               for(int i=0; i<last.getTrans().size(); i++){
-                view += "From: " + last.getTrans(i).getSendAddr() + "  To: " + last.getTrans(i).getRecAddr() + "  Value: " + last.getTrans(i).getValue() + "\n" ;
+                view += "From: " + last.getTrans().get(i).getSendAddr() + "  To: " + last.getTrans().get(i).getRecAddr() + "  Value: " + last.getTrans().get(i).getValue() + "\n" ;
               }
               oos = new ObjectOutputStream(s_cli.getOutputStream());
               oos.writeObject(view);
@@ -199,7 +205,34 @@ public class ServerThread extends Thread {
               int id = Integer.parseInt(id_str);
               float value = Float.parseFloat(value_str);
               Transaction tran = miner.getWallet().sendFunds(nodes.get(id).getPublicKey(), value);
-              // now check if it is null or not
+              String return_msg;
+              if (tran == null) {
+                return_msg = "You don't have enough coins for the transaction.";
+                continue;
+              }
+              Message msg = new Message("transaction", tran);
+              for (int i=0; i<nodes.size(); i++) {
+                Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+                oos = new ObjectOutputStream(s.getOutputStream());
+                oos.writeObject(msg);
+                oos.close();
+              }
+            }
+            if (message.getType().equals("transaction")) {
+              block.addTransaction(message.getTransaction(), blockchain);
+              if (block.getTrans().size() == blockchain.getMaxTrans()) {
+                Thread t = new ServerThread(block, blockchain, miner, nodes);
+                t.start();
+              }
+            }
+            if (message.getType().equals("block")) {
+              keepGoing = false;
+              blockchain.getBlockchain().add(message.getBlock());
+              boolean isValid = blockchain.isValid();
+              if (!isValid) {
+                blockchain.getBlockchain().remove(blockchain.getBlockchain().size() - 1);
+                // consensus
+              }
             }
             if (message.getType().equals("this")) {
               // do this
@@ -232,15 +265,33 @@ public class ServerThread extends Thread {
     @Override
     public void run() {
       try{
-        ServerSocket listener = new ServerSocket(9090);
-        Socket socket = listener.accept();
-        if(operation.equals("boot")) {
-
-
+        String target = new String("");
+	    	Random rand = new Random();
+	    	int rand_int1;
+				String hash = new String("");
+	    	for(int i=0; i<blockchain.getDifficulty(); i++)
+	    		target += "0";
+        boolean win = false;
+	    	while(keepGoing) {
+	    		rand_int1 = rand.nextInt(2147483647); //or nonce++
+	        	myBlock.setNonce(rand_int1);
+	        	hash = myBlock.calculateHash();
+	        	if(hash.substring(0, blockchain.getDifficulty()).equals(target)) {
+              win = true;
+              break;
+            }
+	    	}
+        if (win) {
+          myBlock.setHash(hash);
+  	    	System.out.println("Block Mined!!! : " + hash);
+          for (int i=0; i<nodes.size(); i++) {
+            Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+            ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+            Message msg = new Message("block", myBlock);
+            oos.writeObject(msg);
+            oos.close();
+          }
         }
-        else if(operation.equals("notboot")) {
-
-        }
-    }  catch (Exception e) { e.printStackTrace();}
+      }  catch (Exception e) { e.printStackTrace();}
   }
 }
