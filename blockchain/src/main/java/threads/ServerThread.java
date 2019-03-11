@@ -78,7 +78,6 @@ public class ServerThread extends Thread {
       			}
             blockchain = (Blockchain) ois.readObject();
             ois.close();
-            socket.close();
             //t.start();
           }
           else {
@@ -128,6 +127,22 @@ public class ServerThread extends Thread {
               oos.writeObject(blockchain);
         			oos.close();
             }
+            // send 100 noobcash coins to each of the others
+            /*Block block;
+            for (int i=1; i<nodes.size(); i++) {
+              if (i%blockchain.getMaxTrans() == 1) {
+                block = new Block(blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1).getHash());
+              }
+              Transaction tran = miner.getWallet().sendFunds(nodes.get(i).getPublicKey(), 100f);
+              block.addTransaction(tran);
+              Message mes = new Message("transaction", tran);
+              for (int j=1; j<nodes.size(); j++) {
+                oos = new ObjectOutputStream(sockets.get(j-1).getOutputStream());
+                oos.writeObject(mes);
+                oos.close();
+              }
+
+            } */
           }
           // send nodes list to client so he can broadcast
           Socket socket_cli = new Socket(myIp, 7070 + miner.getIndex());
@@ -144,6 +159,19 @@ public class ServerThread extends Thread {
           }
           // connections done (let's hope so)
 
+          if (myPort == 10000) {
+            String tr100 = "t ";
+            for (int i=1; i<nodes.size(); i++) {
+              tr100 += i + " 100";
+              Message mes = new Message(tr100);
+              Socket s100 = new Socket(myIp, myPort);
+              oos = new ObjectOutputStream(s100.getOutputStream());
+              oos.writeObject(mes);
+              oos.close();
+            }
+
+          }
+
           // now server waits to receive (transactions, blocks, etc)
           ServerSocket ss_await = new ServerSocket(myPort);
           while (true) {
@@ -153,6 +181,12 @@ public class ServerThread extends Thread {
             if (message.getType().equals("balance")) {
               oos = new ObjectOutputStream(s_cli.getOutputStream());
               oos.writeFloat(miner.getWallet().getBalance());
+            }
+            if (message.getType().equals("view")) {
+              // do view
+            }
+            if (message.getType().startsWith("t ")) {
+              // do this
             }
             if (message.getType().equals("this")) {
               // do this

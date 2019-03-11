@@ -24,6 +24,10 @@ public class Blockchain implements Serializable {
      return this.minimumTransaction;
    }
 
+   public List<Block> getBlockchain() {
+     return this.blockchain;
+   }
+
    public void setUTXOs(String id, TransactionOutput out){
       this.UTXOs.put(id,out);
    }
