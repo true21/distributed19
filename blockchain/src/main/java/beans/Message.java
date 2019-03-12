@@ -11,6 +11,7 @@ public class Message implements Serializable {
   private String type;
   private Transaction transaction;
   private Block block;
+  private Blockchain blockchain;
 
 
   public Message (String typ, Transaction trans) {
@@ -21,6 +22,11 @@ public class Message implements Serializable {
   public Message (String typ, Block blo) {
     this.type = typ;
     this.block = blo;
+  }
+
+  public Message (String typ, Blockchain bc) {
+    this.type = typ;
+    this.blockchain = bc;
   }
 
   public Message (String typ) {
@@ -45,6 +51,10 @@ public class Message implements Serializable {
 
   public Block getBlock() {
     return this.block;
+  }
+
+  public Blockchain getBlockchain() {
+    return this.blockchain;
   }
 
 }

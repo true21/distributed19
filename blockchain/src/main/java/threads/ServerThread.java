@@ -240,9 +240,35 @@ public class ServerThread extends Thread {
               if (!isValid) {
                 blockchain.getBlockchain().remove(blockchain.getBlockchain().size()-1);
                 // consensus
+                Message cons_msg = new Message("consensus");
+                for (int i=0; i<nodes.size(); i++) {
+                  Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+                  oos = new ObjectOutputStream(s.getOutputStream());
+                  oos.writeObject(cons_msg);
+                }
               }
               else {
                   block.setPreviousHash(message.getBlock().getHash());
+              }
+            }
+            else if (message.getType().equals("consensus")) {
+              Message bc_msg = new Message("blockchain", blockchain);
+              for (int i=0; i<nodes.size(); i++) {
+                if (i == miner.getIndex()) continue;
+                Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+                oos = new ObjectOutputStream(s.getOutputStream());
+                oos.writeObject(bc_msg);
+              }
+            }
+            else if (message.getType().equals("blockchain")) {
+              if (blockchain.getBlockchain().size() < message.getBlockchain().getBlockchain().size()) {
+                blockchain = message.getBlockchain();
+              }
+              else if (blockchain.getBlockchain().size() == message.getBlockchain().getBlockchain().size()) {
+                int comp_str = blockchain.getBlockchain().toString().compareTo(message.getBlockchain().toString());
+                if (comp_str > 0) {
+                  blockchain = message.getBlockchain();
+                }
               }
             }
             else if (message.getType().equals("this")) {
