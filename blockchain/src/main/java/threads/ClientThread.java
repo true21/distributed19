@@ -52,8 +52,33 @@ public class ClientThread extends Thread {
 				Socket s_check = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
 			}
 			// now we're good to go
-			// socket
+
+			// socket arguments of client's server
 			InetAddress ip = nodes.get(index).getIP();
+			int port = nodes.get(index).getPort();
+
+			// send 100 noobcash coins to others if Bootstrap
+			if (index == 0) {
+				String tr100 = "t ";
+				for (int i=1; i<nodes.size(); i++) {
+					tr100 += i + " 100";
+					Message mes = new Message(tr100);
+					Socket s100 = new Socket(ip, port);
+					ObjectOutputStream oos = new ObjectOutputStream(s100.getOutputStream());
+					oos.writeObject(mes);
+					//oos.close();
+				}
+				// say to others client's that they're ready to go
+				for (int i=1; i<nodes.size(); i++) {
+					Socket s_ready = new Socket(nodes.get(i).getIP(), 7070 + i);
+				}
+			}
+			else {
+				ServerSocket ss_readyy = new ServerSocket(7070 + index);
+				// be notified when you're ready to go
+	      Socket s_readyy = ss_readyy.accept();
+			}
+
 			// get input from console
 			Scanner scanner = new Scanner(System.in);
 
@@ -62,7 +87,7 @@ public class ClientThread extends Thread {
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line;
   		while ((line = br.readLine()) != null) {
-				Socket s = new Socket(ip, 9090 + index);
+				Socket s = new Socket(ip, port);
 				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				String toSend = "t " + line.replace("id", "");
 				Message message = new Message(toSend);

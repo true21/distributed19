@@ -163,7 +163,7 @@ public class ServerThread extends Thread {
             //s.close();
           }
           // connections done (let's hope so)
-
+          /*
           if (myPort == 10000) {
             String tr100 = "t ";
             for (int i=1; i<nodes.size(); i++) {
@@ -176,6 +176,7 @@ public class ServerThread extends Thread {
             }
 
           }
+          */
 
           Block block = new Block(blockchain.getBlockchain().get(0).getHash());
           // now server waits to receive (transactions, blocks, etc)
