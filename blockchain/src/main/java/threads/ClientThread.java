@@ -39,7 +39,9 @@ public class ClientThread extends Thread {
 			// get all nodes ids
 			ArrayList<Node> nodes = new ArrayList<Node>();
 			ServerSocket ss = new ServerSocket(7070 + index);
+			System.out.println("Listening1 to " + 7070 + index);
       Socket s_nodeId = ss.accept();
+			System.out.println("Accepting2");
 			ObjectInputStream ois = new ObjectInputStream(s_nodeId.getInputStream());
 			Node temp_node;
 			for (int i=0; i<n; i++) {
@@ -50,7 +52,9 @@ public class ClientThread extends Thread {
 			s_nodeId.close();
 			// check if you can connect to all servers
 			for (int i=0; i<nodes.size(); i++) {
+				System.out.println("Connecting3 to " + nodes.get(i).getPort());
 				Socket s_check = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+				System.out.println("Connected4");
 			}
 			// now we're good to go
 
@@ -58,26 +62,35 @@ public class ClientThread extends Thread {
 			InetAddress ip = nodes.get(index).getIP();
 			int port = nodes.get(index).getPort();
 
+
+
 			// send 100 noobcash coins to others if Bootstrap
 			if (index == 0) {
 				String tr100 = "t ";
 				for (int i=1; i<nodes.size(); i++) {
 					tr100 += i + " 100";
 					Message mes = new Message(tr100);
+					System.out.println("Connecting5 to " + port);
 					Socket s100 = new Socket(ip, port);
+					System.out.println("Connected6");
 					ObjectOutputStream oos = new ObjectOutputStream(s100.getOutputStream());
 					oos.writeObject(mes);
 					//oos.close();
 				}
 				// say to others client's that they're ready to go
 				for (int i=1; i<nodes.size(); i++) {
+					System.out.println("Connecting7 to " + 7070 + i);
 					Socket s_ready = new Socket(nodes.get(i).getIP(), 7070 + i);
+					System.out.println("Connected8");
 				}
 			}
 			else {
+
 				ServerSocket ss_readyy = new ServerSocket(7070 + index);
+				System.out.println("Listening9 to " + 7070 + index);
 				// be notified when you're ready to go
 	      Socket s_readyy = ss_readyy.accept();
+				System.out.println("Accepting10");
 			}
 
 			// get input from console
@@ -97,8 +110,9 @@ public class ClientThread extends Thread {
 */
 			// cli
 			while (true) {
+				System.out.println("Connecting21 to " + port);
 				Socket s = new Socket(ip, port);
-
+				System.out.println("Connected22");
 				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				String sendToServer = new String("");
 				String help = "explain stuff";

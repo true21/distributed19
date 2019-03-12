@@ -60,7 +60,9 @@ public class ServerThread extends Thread {
           // cases not_bootstrap, bootstrap below
           if (myPort != 10000) {
             // Non-boot nodes here
+            System.out.println("Connecting11 to " + 10000);
             Socket socket = new Socket(bootIp, 10000);
+            System.out.println("Connected12");
             System.out.println("Connected to bootstrap node!");
             //System.out.println("Spawning thread for towards bootstrap communication ");
             //Thread t = new ServerThread(soct,"notboot",InetAddress.getByName(args[0]),args[1]);
@@ -115,7 +117,9 @@ public class ServerThread extends Thread {
             List<ObjectOutputStream> outputs = new ArrayList<ObjectOutputStream>();
             int c = 1; // mallon
             while (c<n) {
+                System.out.println("Listening13 to " + 10000);
                 Socket socket_boot = listener.accept();
+                System.out.println("Accepting14");
                 sockets.add(socket_boot);
                 System.out.println("Spawning thread for bootstrap incoming communication " );
                 //Thread t = new ServerThread(socket,"boot",InetAddress.getByName(args[0]),args[1]);
@@ -164,9 +168,11 @@ public class ServerThread extends Thread {
             } */
           }
           // send nodes list to client so he can broadcast
+          //System.exit(0);
           int poort = 7070 + miner.getIndex();
-          System.out.println("port " + poort);
+          System.out.println("Connecting15 to " + poort);
           Socket socket_cli = new Socket(myIp, poort);
+          System.out.println("Connected16");
           ObjectOutputStream oos = new ObjectOutputStream(socket_cli.getOutputStream());
           for(int i=0;i<nodes.size();i++) {
             // broadcast list of nodes ids
@@ -175,7 +181,9 @@ public class ServerThread extends Thread {
           // check if all clients can connect with you
           ServerSocket ss = new ServerSocket(myPort);
           for (int i=0; i<n; i++) {
+            System.out.println("Listening17 to " + myPort);
             Socket s = ss.accept();
+            System.out.println("Accepting18");
             //s.close();
           }
           // connections done (let's hope so)
@@ -198,7 +206,9 @@ public class ServerThread extends Thread {
           // now server waits to receive (transactions, blocks, etc)
           ServerSocket ss_await = new ServerSocket(myPort);
           while (true) {
+            System.out.println("Listening19 to " + myPort);
             Socket s_cli = ss_await.accept();
+            System.out.println("Accepting20");
             ObjectInputStream ois = new ObjectInputStream(s_cli.getInputStream());
             Message message = (Message) ois.readObject();
             if (message.getType().equals("balance")) {
