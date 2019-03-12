@@ -50,12 +50,14 @@ public class ClientThread extends Thread {
 			}
 			//System.out.println("hey with listsize " + nodes.size());
 			s_nodeId.close();
+			ss.close();
+			System.out.println("server socket close");
 			// check if you can connect to all servers
-			for (int i=0; i<nodes.size(); i++) {
+			/*for (int i=0; i<nodes.size(); i++) {
 				System.out.println("Connecting3 to " + nodes.get(i).getPort());
 				Socket s_check = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
 				System.out.println("Connected4");
-			}
+			}*/
 			// now we're good to go
 
 			// socket arguments of client's server
@@ -75,6 +77,9 @@ public class ClientThread extends Thread {
 					System.out.println("Connected6");
 					ObjectOutputStream oos = new ObjectOutputStream(s100.getOutputStream());
 					oos.writeObject(mes);
+					ObjectInputStream ms = new ObjectInputStream(s100.getInputStream());
+					String str = (String) ms.readObject();
+					s100.close();
 					//oos.close();
 				}
 				// say to others client's that they're ready to go
@@ -82,6 +87,7 @@ public class ClientThread extends Thread {
 					System.out.println("Connecting7 to " + 7070 + i);
 					Socket s_ready = new Socket(nodes.get(i).getIP(), 7070 + i);
 					System.out.println("Connected8");
+					s_ready.close();
 				}
 			}
 			else {
@@ -91,6 +97,8 @@ public class ClientThread extends Thread {
 				// be notified when you're ready to go
 	      Socket s_readyy = ss_readyy.accept();
 				System.out.println("Accepting10");
+				s_readyy.close();
+				ss_readyy.close();
 			}
 
 			// get input from console

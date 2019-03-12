@@ -85,7 +85,6 @@ public class ServerThread extends Thread {
             int ind = inputstream.readInt();
       			miner.setIndex(ind);
       			//inputstream.close();
-            System.out.println("hey" + ind);
             //ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
       			Node node3;
       			for (int i=0; i<n; i++) {
@@ -95,6 +94,8 @@ public class ServerThread extends Thread {
             blockchain = (Blockchain) inputstream.readObject();
             //ois.close();
             //t.start();
+            socket.close(); /////////////////
+            System.out.println("socket closed");
           }
           else {
             // Bootstrap node here
@@ -150,6 +151,13 @@ public class ServerThread extends Thread {
               outputs.get(j).writeObject(blockchain);
         			//oos.close();
             }
+            for(int i=0; i<sockets.size(); i++){
+              if(sockets.get(i).getInputStream().read()==-1){
+                sockets.get(i).close();
+                System.out.println("server socket close");
+              }
+            }
+            listener.close();
             // send 100 noobcash coins to each of the others
             /*Block block;
             for (int i=1; i<nodes.size(); i++) {
@@ -178,14 +186,18 @@ public class ServerThread extends Thread {
             // broadcast list of nodes ids
             oos.writeObject(nodes.get(i));
           }
+          if(socket_cli.getInputStream().read()==-1){
+            socket_cli.close();
+            System.out.println("socket close");
+          }
           // check if all clients can connect with you
-          ServerSocket ss = new ServerSocket(myPort);
+          /*ServerSocket ss = new ServerSocket(myPort);
           for (int i=0; i<n; i++) {
             System.out.println("Listening17 to " + myPort);
             Socket s = ss.accept();
             System.out.println("Accepting18");
             //s.close();
-          }
+          }*/
           // connections done (let's hope so)
           /*
           if (myPort == 10000) {
@@ -203,6 +215,7 @@ public class ServerThread extends Thread {
           */
 
           Block block = new Block(blockchain.getBlockchain().get(0).getHash());
+          System.out.println("genesis previous hash "+blockchain.getBlockchain().get(0).getPreviousHash());
           // now server waits to receive (transactions, blocks, etc)
           ServerSocket ss_await = new ServerSocket(myPort);
           while (true) {
@@ -250,8 +263,13 @@ public class ServerThread extends Thread {
               }
               oos = new ObjectOutputStream(s_cli.getOutputStream());
               oos.writeObject(return_msg);
+              if(s_cli.getInputStream().read()==-1){
+    						s_cli.close();
+    						System.out.println("server socket close");
+    					}
             }
             else if (message.getType().equals("transaction")) {
+              System.out.println("transaction value: " + message.getTransaction().value);
               block.addTransaction(message.getTransaction(), blockchain);
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
                 Thread t = new ServerThread("aek", null, block, blockchain, miner, nodes);

@@ -49,6 +49,9 @@ public class Blockchain implements Serializable {
         if (!newBlock.getPreviousHash().equals("1")) {
           miner.mineBlock(newBlock, difficulty);
         }
+        else {
+          newBlock.setHash(newBlock.calculateHash());
+        }
   		  blockchain.add(newBlock);
       }  catch (Exception e) { e.printStackTrace();}
     }
