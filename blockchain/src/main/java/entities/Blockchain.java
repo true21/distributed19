@@ -51,6 +51,7 @@ public class Blockchain implements Serializable {
         }
         else {
           newBlock.setHash(newBlock.calculateHash());
+          //newBlock.setHash("qwerty");
         }
   		  blockchain.add(newBlock);
       }  catch (Exception e) { e.printStackTrace();}

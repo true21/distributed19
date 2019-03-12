@@ -1,4 +1,12 @@
-apply plugin: 'java'
+plugins {
+    id 'java'                               //for java-only project
+    id 'groovy'                             //for mixed java/groovy project
+    id 'war'                                //for genarating war files
+    id 'org.akhikhl.gretty' version '2.0.0' //web app development plugin
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 repositories {
     mavenCentral()
@@ -14,9 +22,34 @@ repositories {
 }
 
 dependencies {
-    compile "javax.json:javax.json-api:1.0"
+    //compile "org.bouncycastle:bcpkix-jdk15on:1.58"
+	
+	compile "javax.servlet:javax.servlet-api:3.1.0"              //the Java servlet libraries
+    //compile "org.codehaus.groovy:groovy-all:2.4.15"            //the Groovy lang
+	compile "javax.mail:mail:1.4.7"
+	compile "javax.json:javax.json-api:1.0"
 	compile "org.json:json:20171018"
 	compile "com.googlecode.json-simple:json-simple:1.1.1"
-    compile "com.google.code.gson:gson:2.8.2"                    //json library
-    compile "org.bouncycastle:bcpkix-jdk15on:1.58"
+
+    compile "org.restlet.jee:org.restlet:2.3.12"                 //for writing RESTful APIs
+    compile "com.google.code.gson:gson:2.8.5"                    //json library
+    compile "org.apache.commons:commons-pool2:2.4.3"             //object pool
+    compile "org.apache.commons:commons-dbcp2:2.1.1"             //db connection pool
+    compile "org.springframework:spring-jdbc:5.0.2.RELEASE"      //spring JDBC template utility
+	
+    runtime "org.restlet.jee:org.restlet.ext.servlet:2.3.12"     //Servlet adapter for Restlet framework
+
+    runtime "mysql:mysql-connector-java:5.1.47"                  //the MySQL JDBC driver    
+	runtime "com.google.code.gson:gson:2.8.5"
+}
+
+task showMeCache << {
+  configurations.compile.each { println it }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'ml.cristatus.todo.ToDoApp'
+    }
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
