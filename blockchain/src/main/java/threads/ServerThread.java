@@ -19,7 +19,7 @@ import java.util.*;
 
 public class ServerThread extends Thread {
 
-    private static volatile boolean keepGoing = true;
+    private static volatile boolean keepGoing;
 
     private Block myBlock;
     private static Blockchain blockchain;
@@ -32,13 +32,17 @@ public class ServerThread extends Thread {
     private static int port;
     private static final int n = 2;
 
-    public ServerThread(/*Socket sock, String op, InetAddress ip, int prt, */Block block, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
+    private String Case;
+    private Message Msg;
+
+    public ServerThread(/*Socket sock, String op, InetAddress ip, int prt, */String cs, Message msg, Block block, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
   		//this.socket = sock;
       //this.operation = op;
       //this.ipAddress = ip;
       //this.port = prt;
+      this.Case = cs;
+      this.Msg = msg;
       this.myBlock = block;
-      this.keepGoing = true;
       this.blockchain = blockchain;
       this.miner = miner;
       this.nodes = nodes;
@@ -212,12 +216,14 @@ public class ServerThread extends Thread {
               }
               else {
                 Message msg = new Message("transaction", tran);
-                for (int i=0; i<nodes.size(); i++) {
+                Thread t = new ServerThread("broadcast", msg, block, blockchain, miner, nodes);
+                t.start();
+                /*for (int i=0; i<nodes.size(); i++) {
                   Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
                   oos = new ObjectOutputStream(s.getOutputStream());
                   oos.writeObject(msg);
                   //oos.close();
-                }
+                }*/
                 return_msg = "Transaction was completed successfully.";
               }
               oos = new ObjectOutputStream(s_cli.getOutputStream());
@@ -226,7 +232,8 @@ public class ServerThread extends Thread {
             else if (message.getType().equals("transaction")) {
               block.addTransaction(message.getTransaction(), blockchain);
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
-                Thread t = new ServerThread(block, blockchain, miner, nodes);
+                Thread t = new ServerThread("aek", null, block, blockchain, miner, nodes);
+                keepGoing = true;
                 t.start();
                 // create new block with invalid previous hash
                 // gonna fix it when its previous enters blockchain
@@ -241,11 +248,13 @@ public class ServerThread extends Thread {
                 blockchain.getBlockchain().remove(blockchain.getBlockchain().size()-1);
                 // consensus
                 Message cons_msg = new Message("consensus");
-                for (int i=0; i<nodes.size(); i++) {
+                Thread t = new ServerThread("broadcast", cons_msg, block, blockchain, miner, nodes);
+                t.start();
+                /*for (int i=0; i<nodes.size(); i++) {
                   Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
                   oos = new ObjectOutputStream(s.getOutputStream());
                   oos.writeObject(cons_msg);
-                }
+                }*/
               }
               else {
                   block.setPreviousHash(message.getBlock().getHash());
@@ -302,31 +311,40 @@ public class ServerThread extends Thread {
     @Override
     public void run() {
       try{
-        String target = new String("");
-	    	Random rand = new Random();
-	    	int rand_int1;
-				String hash = new String("");
-	    	for(int i=0; i<blockchain.getDifficulty(); i++)
-	    		target += "0";
-        boolean win = false;
-	    	while(keepGoing) {
-	    		rand_int1 = rand.nextInt(2147483647); //or nonce++
-	        	myBlock.setNonce(rand_int1);
-	        	hash = myBlock.calculateHash();
-	        	if(hash.substring(0, blockchain.getDifficulty()).equals(target)) {
-              win = true;
-              break;
-            }
-	    	}
-        if (win) {
-          myBlock.setHash(hash);
-  	    	System.out.println("Block Mined!!! : " + hash);
+        if (Case.equals("broadcast")) {
           for (int i=0; i<nodes.size(); i++) {
             Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-            Message msg = new Message("block", myBlock);
-            oos.writeObject(msg);
-            //oos.close();
+            oos.writeObject(Msg);
+          }
+        }
+        else {
+          String target = new String("");
+  	    	Random rand = new Random();
+  	    	int rand_int1;
+  				String hash = new String("");
+  	    	for(int i=0; i<blockchain.getDifficulty(); i++)
+  	    		target += "0";
+          boolean win = false;
+  	    	while(keepGoing) {
+  	    		rand_int1 = rand.nextInt(2147483647); //or nonce++
+  	        	myBlock.setNonce(rand_int1);
+  	        	hash = myBlock.calculateHash();
+  	        	if(hash.substring(0, blockchain.getDifficulty()).equals(target)) {
+                win = true;
+                break;
+              }
+  	    	}
+          if (win) {
+            myBlock.setHash(hash);
+    	    	System.out.println("Block Mined!!! : " + hash);
+            for (int i=0; i<nodes.size(); i++) {
+              Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+              ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+              Message msg = new Message("block", myBlock);
+              oos.writeObject(msg);
+              //oos.close();
+            }
           }
         }
       }  catch (Exception e) { e.printStackTrace();}
