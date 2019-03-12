@@ -74,23 +74,29 @@ public class ServerThread extends Thread {
       			node.setKey(miner.getWallet().getPublicKey());*/
             // new node sends its identification
       			objectOutputStream.writeObject(node);
+
+            //objectOutputStream.reset();
+            //System.out.println(node.getIP() + " " + node.getPublicKey());
       			//objectOutputStream.close();
       			ObjectInputStream inputstream = new ObjectInputStream(socket.getInputStream());
             // new node sets its id, sent by bootstrap
-      			miner.setIndex(inputstream.readInt());
+            int ind = inputstream.readInt();
+      			miner.setIndex(ind);
       			//inputstream.close();
-            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            System.out.println("hey" + ind);
+            //ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
       			Node node3;
       			for (int i=0; i<n; i++) {
-      				node3 = (Node) ois.readObject();
+      				node3 = (Node) inputstream.readObject();
       				nodes.add(node3); //receive list by bootstrap
       			}
-            blockchain = (Blockchain) ois.readObject();
+            blockchain = (Blockchain) inputstream.readObject();
             //ois.close();
             //t.start();
           }
           else {
             // Bootstrap node here
+            miner.setIndex(0);
             blockchain = new Blockchain();
             Node node = new Node(0, myIp, myPort, miner.getWallet().getPublicKey());
             nodes.add(node);
@@ -106,6 +112,7 @@ public class ServerThread extends Thread {
             blockchain.addBlock(gen_block, miner);
             ServerSocket listener = new ServerSocket(10000);
             List<Socket> sockets = new ArrayList<Socket>();
+            List<ObjectOutputStream> outputs = new ArrayList<ObjectOutputStream>();
             int c = 1; // mallon
             while (c<n) {
                 Socket socket_boot = listener.accept();
@@ -119,21 +126,24 @@ public class ServerThread extends Thread {
                 node2 = (Node) objectInputStream.readObject();
                 node2.setIndex(nodes.size());
                 nodes.add(node2);
+                //System.out.println(node2.getIndex() + " " + node2.getPublicKey() + " " + nodes.size());
                 // bootstrap receives node's id, adds it to list and sends his index
                 ObjectOutputStream output = new ObjectOutputStream(socket_boot.getOutputStream());
+                outputs.add(output);
                 output.writeInt(node2.getIndex());
+                System.out.println("hey" + node2.getIndex());
                 //output.close();
                 //objectInputStream.close();
                 //t.start();
                 c++;
             }
-            for (int j=0; j<sockets.size(); j++) {
-              ObjectOutputStream oos = new ObjectOutputStream(sockets.get(j).getOutputStream());
+            for (int j=0; j<outputs.size(); j++) {
+              //ObjectOutputStream oos = new ObjectOutputStream(sockets.get(j).getOutputStream());
         			for(int i=0;i<nodes.size();i++) {
                 // broadcast list of nodes ids
-        				oos.writeObject(nodes.get(i));
+        				outputs.get(j).writeObject(nodes.get(i));
         			}
-              oos.writeObject(blockchain);
+              outputs.get(j).writeObject(blockchain);
         			//oos.close();
             }
             // send 100 noobcash coins to each of the others
@@ -154,7 +164,9 @@ public class ServerThread extends Thread {
             } */
           }
           // send nodes list to client so he can broadcast
-          Socket socket_cli = new Socket(myIp, 7070 + miner.getIndex());
+          int poort = 7070 + miner.getIndex();
+          System.out.println("port " + poort);
+          Socket socket_cli = new Socket(myIp, poort);
           ObjectOutputStream oos = new ObjectOutputStream(socket_cli.getOutputStream());
           for(int i=0;i<nodes.size();i++) {
             // broadcast list of nodes ids

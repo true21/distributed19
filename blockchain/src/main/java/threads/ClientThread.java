@@ -46,6 +46,7 @@ public class ClientThread extends Thread {
 				temp_node = (Node) ois.readObject();
 				nodes.add(temp_node);
 			}
+			//System.out.println("hey with listsize " + nodes.size());
 			s_nodeId.close();
 			// check if you can connect to all servers
 			for (int i=0; i<nodes.size(); i++) {
@@ -81,7 +82,7 @@ public class ClientThread extends Thread {
 
 			// get input from console
 			Scanner scanner = new Scanner(System.in);
-
+/*
 			// file
 			String file = "../../resources/transactions/" + n + "nodes/transactions" + index + ".txt";
 			BufferedReader br = new BufferedReader(new FileReader(file));
@@ -93,10 +94,11 @@ public class ClientThread extends Thread {
 				Message message = new Message(toSend);
 				oos.writeObject(message);
   		}
-
+*/
 			// cli
 			while (true) {
-				Socket s = new Socket(ip, 9090 + index);
+				Socket s = new Socket(ip, port);
+
 				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				String sendToServer = new String("");
 				String help = "explain stuff";
@@ -104,6 +106,7 @@ public class ClientThread extends Thread {
 				// read line
 				String command = scanner.nextLine();
 				List<String> cmd_args = Arrays.asList(command.trim().split("\\s+"));
+				System.out.println("gave " + cmd_args.get(0));
 				if (cmd_args.size() == 1) {
 					if (cmd_args.get(0).equals("view")) {
 						sendToServer = "view";
