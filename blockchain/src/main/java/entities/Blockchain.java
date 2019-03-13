@@ -106,12 +106,17 @@ public class Blockchain implements Serializable {
               return false;
             }
 
+
+            System.out.println("tempOutput.value = " + tempOutput.value);
             if (input == null) {
               System.out.println("input null");
             }
             if (input.UTXO == null) {
+
+              System.out.println("Block: " + i + ", Transaction: " + t);
               System.out.println("input.UTXO null");
             }
+            System.out.println("input.UTXO.value = " + input.UTXO.value);
 
             if(input.UTXO.value != tempOutput.value) {
               System.out.println("#Referenced input Transaction(" + t + ") value is Invalid");

@@ -277,6 +277,10 @@ public class ServerThread extends Thread {
               }
               if (valid_id) {
                 tran = miner.getWallet().sendFunds(nodes.get(id).getPublicKey(), value, blockchain);
+                if (tran.transaction_inputs.get(0).UTXO != null)
+                  System.out.println("INITIAL stuff about transaction" + tran.transaction_inputs.get(0).UTXO.toString());
+                else
+                  System.out.println("INITIAL I'M NULL");
               }
               else {
                 tran = null;
@@ -308,8 +312,14 @@ public class ServerThread extends Thread {
     					}
             }
             else if (message.getType().equals("transaction")) {
+              s_cli.close();
               System.out.println("transaction value: " + message.getTransaction().value);
               block.addTransaction(message.getTransaction(), blockchain);
+              System.out.println("message.getTransaction().value " + message.getTransaction().value);
+              if (message.getTransaction().transaction_inputs.get(0).UTXO != null)
+                System.out.println("stuff about transaction" + message.getTransaction().transaction_inputs.get(0).UTXO.toString());
+              else
+                System.out.println("I'M NULL");
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
                 Thread t = new ServerThread("aek", null, block, blockchain, miner, nodes);
                 keepGoing = true;
@@ -320,6 +330,7 @@ public class ServerThread extends Thread {
               }
             }
             else if (message.getType().equals("block")) {
+              s_cli.close();
               System.out.println("got into block handler");
               keepGoing = false;
               System.out.println("hashes: " + message.getBlock().getPreviousHash() + ", " + blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1).getHash());
@@ -344,15 +355,21 @@ public class ServerThread extends Thread {
               }
             }
             else if (message.getType().equals("consensus")) {
+              s_cli.close();
               Message bc_msg = new Message("blockchain", blockchain);
               for (int i=0; i<nodes.size(); i++) {
                 if (i == miner.getIndex()) continue;
                 Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
                 oos = new ObjectOutputStream(s.getOutputStream());
                 oos.writeObject(bc_msg);
+                if(s.getInputStream().read()==-1){
+                  s.close();
+                  System.out.println("server socket close");
+                }
               }
             }
             else if (message.getType().equals("blockchain")) {
+              s_cli.close();
               if (blockchain.getBlockchain().size() < message.getBlockchain().getBlockchain().size()) {
                 blockchain = message.getBlockchain();
               }
@@ -399,6 +416,16 @@ public class ServerThread extends Thread {
             Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
             oos.writeObject(Msg);
+            if (Msg.getType().equals("transaction")) {
+              if (Msg.getTransaction().transaction_inputs.get(0).UTXO != null)
+                System.out.println("THREAD stuff about transaction" + Msg.getTransaction().transaction_inputs.get(0).UTXO.toString());
+              else
+                System.out.println("THREAD I'M NULL");
+            }
+            if(s.getInputStream().read()==-1){
+              s.close();
+              System.out.println("server socket close");
+            }
           }
         }
         else {
@@ -432,7 +459,10 @@ public class ServerThread extends Thread {
               ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
               Message msg = new Message("block", myBlock);
               oos.writeObject(msg);
-              //oos.close();
+              if(s.getInputStream().read()==-1){
+    						s.close();
+    						System.out.println("server socket close");
+    					}
             }
           }
         }

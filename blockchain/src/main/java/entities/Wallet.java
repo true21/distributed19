@@ -106,13 +106,18 @@ public class Wallet implements Serializable {
       //create array list of inputs
       ArrayList<TransactionInput> inputs = new ArrayList<TransactionInput>();
 
+      boolean aek = true;
       float total = 0;
-      for (Map.Entry<String, TransactionOutput> item: UTXOs.entrySet()){
+      for (Map.Entry<String, TransactionOutput> item: UTXOs.entrySet()) {
+        aek = false;
         TransactionOutput UTXO = item.getValue();
         total += UTXO.value;
         inputs.add(new TransactionInput(UTXO.id));
         if(total > value) break;
       }
+
+      if (aek) System.out.println("----------------------NEVER GOT IN HERE");
+      else System.out.println("----------------------GOT IN HERE");
 
       Transaction newTransaction = new Transaction(publicKey, _recipient , value, inputs);
       newTransaction.generateSignature(privateKey);
