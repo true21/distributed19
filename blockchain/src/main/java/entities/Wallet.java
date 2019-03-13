@@ -79,9 +79,9 @@ public class Wallet implements Serializable {
       return total;
     }*/
 
-    public float getBalance() {
+    public float getBalance(Blockchain blockchain) {
       float total = 0;
-      for (Map.Entry<String, TransactionOutput> item: Blockchain.getUTXOs().entrySet()){
+      for (Map.Entry<String, TransactionOutput> item: blockchain.getUTXOs().entrySet()){
         TransactionOutput UTXO = item.getValue();
         if(UTXO.isMine(publicKey)) { //if output belongs to me ( if coins belong to me )
           UTXOs.put(UTXO.id,UTXO); //add it to our list of unspent transactions.
@@ -98,8 +98,8 @@ public class Wallet implements Serializable {
      * @param allUTXOs
      * @return
      */
-    public Transaction sendFunds(PublicKey _recipient, float value/*HashMap<String,TransactionOutput> allUTXOs*/) {
-      if(getBalance() < value) { //gather balance and check funds.
+    public Transaction sendFunds(PublicKey _recipient, float value, Blockchain blockchain/*HashMap<String,TransactionOutput> allUTXOs*/) {
+      if(getBalance(blockchain) < value) { //gather balance and check funds.
         System.out.println("#Not Enough funds to send transaction. Transaction Discarded.");
         return null;
       }

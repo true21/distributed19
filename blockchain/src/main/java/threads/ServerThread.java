@@ -226,17 +226,43 @@ public class ServerThread extends Thread {
             Message message = (Message) ois.readObject();
             if (message.getType().equals("balance")) {
               oos = new ObjectOutputStream(s_cli.getOutputStream());
-              oos.writeFloat(miner.getWallet().getBalance());
+              float balance = miner.getWallet().getBalance(blockchain);
+              oos.writeObject(Float.toString(balance));
+              if(s_cli.getInputStream().read()==-1){
+                s_cli.close();
+    						System.out.println("server socket close");
+    					}
+            }
+            else if (message.getType().equals("help")) {
+              s_cli.close();
+              System.out.println("server socket close");
             }
             else if (message.getType().equals("view")) {
               // do view
               Block last = blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1);
+              System.out.println("blockchain length: " + blockchain.getBlockchain().size());
               String view = new String("");
+              PublicKey sKey;
+              PublicKey rKey;
+              int sk = -1;
+              int rk = -1;
               for(int i=0; i<last.getTrans().size(); i++){
-                view += "From: " + last.getTrans().get(i).getSendAddr() + "  To: " + last.getTrans().get(i).getRecAddr() + "  Value: " + last.getTrans().get(i).getValue() + "\n" ;
+                sKey = last.getTrans().get(i).getSendAddr();
+                rKey = last.getTrans().get(i).getRecAddr();
+                for (int j=0; j<nodes.size(); j++) {
+                  if (nodes.get(j).getPublicKey().equals(sKey))
+                    sk = j;
+                  if (nodes.get(j).getPublicKey().equals(rKey))
+                    rk = j;
+                }
+                view += "From: node" + sk + "  To: node" + rk + "  Value: " + last.getTrans().get(i).getValue() + "\n";
               }
               oos = new ObjectOutputStream(s_cli.getOutputStream());
               oos.writeObject(view);
+              if(s_cli.getInputStream().read()==-1){
+    						s_cli.close();
+    						System.out.println("server socket close");
+    					}
             }
             else if (message.getType().startsWith("t ")) {
               String[] parts = message.getType().split(" ");
@@ -244,9 +270,22 @@ public class ServerThread extends Thread {
               String value_str = parts[2];
               int id = Integer.parseInt(id_str);
               float value = Float.parseFloat(value_str);
-              Transaction tran = miner.getWallet().sendFunds(nodes.get(id).getPublicKey(), value);
+              boolean valid_id = true;
+              Transaction tran;
+              if (id == miner.getIndex() || id < 0 || id >= n) {
+                valid_id = false;
+              }
+              if (valid_id) {
+                tran = miner.getWallet().sendFunds(nodes.get(id).getPublicKey(), value, blockchain);
+              }
+              else {
+                tran = null;
+              }
               String return_msg;
-              if (tran == null) {
+              if (!valid_id) {
+                return_msg = "Invalid receiver id. Aborting transaction..";
+              }
+              else if (tran == null) {
                 return_msg = "You don't have enough coins for the transaction.";
               }
               else {
@@ -281,10 +320,13 @@ public class ServerThread extends Thread {
               }
             }
             else if (message.getType().equals("block")) {
+              System.out.println("got into block handler");
               keepGoing = false;
+              System.out.println("hashes: " + message.getBlock().getPreviousHash() + ", " + blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1).getHash());
               blockchain.getBlockchain().add(message.getBlock());
               boolean isValid = blockchain.isValid();
               if (!isValid) {
+                System.out.println("block in not valid");
                 blockchain.getBlockchain().remove(blockchain.getBlockchain().size()-1);
                 // consensus
                 Message cons_msg = new Message("consensus");
@@ -297,7 +339,8 @@ public class ServerThread extends Thread {
                 }*/
               }
               else {
-                  block.setPreviousHash(message.getBlock().getHash());
+                System.out.println("block in valid");
+                block.setPreviousHash(message.getBlock().getHash());
               }
             }
             else if (message.getType().equals("consensus")) {
@@ -366,14 +409,20 @@ public class ServerThread extends Thread {
   	    	for(int i=0; i<blockchain.getDifficulty(); i++)
   	    		target += "0";
           boolean win = false;
+          int count = 0;
+          int cnt = miner.getIndex();
   	    	while(keepGoing) {
-  	    		rand_int1 = rand.nextInt(2147483647); //or nonce++
-  	        	myBlock.setNonce(rand_int1);
-  	        	hash = myBlock.calculateHash();
-  	        	if(hash.substring(0, blockchain.getDifficulty()).equals(target)) {
-                win = true;
-                break;
-              }
+            if (count%50 == 0) System.out.println("mining...");
+            count++;
+            cnt += n;
+  	    		//rand_int1 = rand.nextInt(2147483647); //or nonce++
+	        	//myBlock.setNonce(rand_int1);
+            myBlock.setNonce(cnt);
+	        	hash = myBlock.calculateHash();
+	        	if(hash.substring(0, blockchain.getDifficulty()).equals(target)) {
+              win = true;
+              break;
+            }
   	    	}
           if (win) {
             myBlock.setHash(hash);

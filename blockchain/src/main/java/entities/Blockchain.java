@@ -66,12 +66,17 @@ public class Blockchain implements Serializable {
 
     public boolean isValid() throws Exception {
       Block currentBlock;
+      HashMap<String,TransactionOutput> tempUTXOs = new HashMap<String,TransactionOutput>(); //a temporary working list of unspent transactions at a given block state.
+      Transaction genesisTransaction = blockchain.get(0).getTrans().get(0);
+      tempUTXOs.put(genesisTransaction.transaction_outputs.get(0).id, genesisTransaction.transaction_outputs.get(0));
 
       for(int i=1; i<blockchain.size(); i++)
       {
         currentBlock = blockchain.get(i);
-        if(!currentBlock.isValid(blockchain))
+        if(!currentBlock.isValid(blockchain)) {
+          System.out.println("currentBlock.isValid fails");
           return false;
+        }
         //check if hash is solved
         String hashTarget = new String(new char[difficulty]).replace('\0', '0');
   			if(!currentBlock.getHash().substring( 0, difficulty).equals(hashTarget)) {
@@ -94,11 +99,18 @@ public class Blockchain implements Serializable {
           }
 
           for(TransactionInput input: currentTransaction.transaction_inputs) {
-            tempOutput = UTXOs.get(input.transactionOutputId);
+            tempOutput = tempUTXOs.get(input.transactionOutputId);
 
             if(tempOutput == null) {
               System.out.println("#Referenced input on Transaction(" + t + ") is Missing");
               return false;
+            }
+
+            if (input == null) {
+              System.out.println("input null");
+            }
+            if (input.UTXO == null) {
+              System.out.println("input.UTXO null");
             }
 
             if(input.UTXO.value != tempOutput.value) {
@@ -106,11 +118,11 @@ public class Blockchain implements Serializable {
               return false;
             }
 
-            UTXOs.remove(input.transactionOutputId);
+            tempUTXOs.remove(input.transactionOutputId);
           }
 
           for(TransactionOutput output: currentTransaction.transaction_outputs) {
-            UTXOs.put(output.id, output);
+            tempUTXOs.put(output.id, output);
           }
 
           if( currentTransaction.getTransOut().get(0).reciepient != currentTransaction.getRecAddr()) {

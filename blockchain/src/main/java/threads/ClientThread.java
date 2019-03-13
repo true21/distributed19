@@ -118,6 +118,8 @@ public class ClientThread extends Thread {
 */
 			// cli
 			while (true) {
+				// read line
+				String command = scanner.nextLine();
 				System.out.println("Connecting21 to " + port);
 				Socket s = new Socket(ip, port);
 				System.out.println("Connected22");
@@ -125,8 +127,6 @@ public class ClientThread extends Thread {
 				String sendToServer = new String("");
 				String help = "explain stuff";
 				String error = "Bad syntax.";
-				// read line
-				String command = scanner.nextLine();
 				List<String> cmd_args = Arrays.asList(command.trim().split("\\s+"));
 				System.out.println("gave " + cmd_args.get(0));
 				if (cmd_args.size() == 1) {
@@ -148,9 +148,19 @@ public class ClientThread extends Thread {
 				if (sendToServer.equals("")) {
 					System.out.println(error);
 					System.out.println(help);
+					Message message = new Message("help");
+					oos.writeObject(message);
+					if(s.getInputStream().read()==-1){
+						s.close();
+					}
 				}
 				else if (sendToServer.equals("help")) {
 					System.out.println(help);
+					Message message = new Message("help");
+					oos.writeObject(message);
+					if(s.getInputStream().read()==-1){
+						s.close();
+					}
 				}
 				else {
 					Message message = new Message(sendToServer);
@@ -158,14 +168,17 @@ public class ClientThread extends Thread {
 					ois = new ObjectInputStream(s.getInputStream());
 					if (sendToServer.equals("balance")) {
 						// balance
-						float balance = ois.readFloat();
+						System.out.println("bal reading");
+						String balance_str = (String) ois.readObject();
+						float balance = Float.parseFloat(balance_str);
+						System.out.println("bal read");
 						System.out.println("Your wallet's balance is: " + balance + " noobcash coins.");
 						s.close();
 					}
 					else if (sendToServer.equals("view")) {
 						// view
 						String view = (String) ois.readObject();
-						System.out.println("The last blocks' transactions are:" + view);
+						System.out.println("The last block's transactions are:\n" + view);
 						s.close();
 					}
 					else {

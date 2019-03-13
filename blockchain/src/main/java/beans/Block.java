@@ -46,11 +46,11 @@ public class Block implements Serializable {
      * Function that calculates the hash on the current block
      */
     public String calculateHash() throws Exception {
-        Gson parser = new Gson();
-        String jsonTransactions = parser.toJson(transactions);
+        //Gson parser = new Gson();
+        //String jsonTransactions = parser.toJson(transactions);
         String calculatedHash = StringUtilities.applySha256(
           Long.toString(timestamp) +
-          jsonTransactions +
+          //jsonTransactions +
           Integer.toString(nonce) +
           previousHash
         );
@@ -116,22 +116,23 @@ public class Block implements Serializable {
     try{
       boolean valid = true;
 
-      /* check current hash */
-      if (!(hash.equals(calculateHash())))
-        valid = false;
-
       /* check previous hash */
       int i = blockchain.indexOf(this);
       if (i != -1)
       {
         Block previousBlock = blockchain.get(i-1);
-        if (!(previousHash.equals(previousBlock.getHash())))
+        if (!(previousHash.equals(previousBlock.getHash()))) {
+          System.out.println("!(previousHash.equals(previousBlock.getHash())) fails in Block.java");
           valid = false;
+        }
       }
-      else valid = false;
+      else {
+        System.out.println("index is -1");
+        valid = false;
+      }
 
       return valid;
-    }  catch (Exception e) { e.printStackTrace(); return false;}
+    }  catch (Exception e) { e.printStackTrace(); System.out.println("Exception"); return false;}
   }
 
 }
