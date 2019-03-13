@@ -17,7 +17,7 @@ public class Blockchain implements Serializable {
     private int difficulty = 4;
     private int maxTransactionInBlock = 5;
     // in order to compile static - else Wallet.getBalance() problematic
-    private static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>(); //static CAREFUUUUUUL
+    private HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>(); //static CAREFUUUUUUL
     private float minimumTransaction;
 
    public float getMinimumTransaction() {
@@ -32,7 +32,7 @@ public class Blockchain implements Serializable {
       this.UTXOs.put(id,out);
    }
 
-   public static HashMap<String,TransactionOutput> getUTXOs() {
+   public HashMap<String,TransactionOutput> getUTXOs() {
      return UTXOs;
    }
 
@@ -74,7 +74,6 @@ public class Blockchain implements Serializable {
       {
         currentBlock = blockchain.get(i);
         if(!currentBlock.isValid(blockchain)) {
-          System.out.println("currentBlock.isValid fails");
           return false;
         }
         //check if hash is solved
@@ -105,18 +104,6 @@ public class Blockchain implements Serializable {
               System.out.println("#Referenced input on Transaction(" + t + ") is Missing");
               return false;
             }
-
-
-            System.out.println("tempOutput.value = " + tempOutput.value);
-            if (input == null) {
-              System.out.println("input null");
-            }
-            if (input.UTXO == null) {
-
-              System.out.println("Block: " + i + ", Transaction: " + t);
-              System.out.println("input.UTXO null");
-            }
-            System.out.println("input.UTXO.value = " + input.UTXO.value);
 
             if(input.UTXO.value != tempOutput.value) {
               System.out.println("#Referenced input Transaction(" + t + ") value is Invalid");

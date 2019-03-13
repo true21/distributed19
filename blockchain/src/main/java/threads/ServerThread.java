@@ -277,10 +277,6 @@ public class ServerThread extends Thread {
               }
               if (valid_id) {
                 tran = miner.getWallet().sendFunds(nodes.get(id).getPublicKey(), value, blockchain);
-                if (tran.transaction_inputs.get(0).UTXO != null)
-                  System.out.println("INITIAL stuff about transaction" + tran.transaction_inputs.get(0).UTXO.toString());
-                else
-                  System.out.println("INITIAL I'M NULL");
               }
               else {
                 tran = null;
@@ -316,10 +312,6 @@ public class ServerThread extends Thread {
               System.out.println("transaction value: " + message.getTransaction().value);
               block.addTransaction(message.getTransaction(), blockchain);
               System.out.println("message.getTransaction().value " + message.getTransaction().value);
-              if (message.getTransaction().transaction_inputs.get(0).UTXO != null)
-                System.out.println("stuff about transaction" + message.getTransaction().transaction_inputs.get(0).UTXO.toString());
-              else
-                System.out.println("I'M NULL");
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
                 Thread t = new ServerThread("aek", null, block, blockchain, miner, nodes);
                 keepGoing = true;
@@ -416,12 +408,6 @@ public class ServerThread extends Thread {
             Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
             oos.writeObject(Msg);
-            if (Msg.getType().equals("transaction")) {
-              if (Msg.getTransaction().transaction_inputs.get(0).UTXO != null)
-                System.out.println("THREAD stuff about transaction" + Msg.getTransaction().transaction_inputs.get(0).UTXO.toString());
-              else
-                System.out.println("THREAD I'M NULL");
-            }
             if(s.getInputStream().read()==-1){
               s.close();
               System.out.println("server socket close");
