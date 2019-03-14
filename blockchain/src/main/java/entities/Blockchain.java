@@ -14,11 +14,16 @@ import java.util.List;
 public class Blockchain implements Serializable {
 
     private List<Block> blockchain = new ArrayList<Block>();
-    private int difficulty = 4;
-    private int maxTransactionInBlock = 5;
+    private int difficulty;
+    private int maxTransactionInBlock;
     // in order to compile static - else Wallet.getBalance() problematic
     private HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>(); //static CAREFUUUUUUL
     private float minimumTransaction;
+
+    public Blockchain(int diff, int max){
+      this.difficulty = diff;
+      this.maxTransactionInBlock = max;
+    }
 
    public float getMinimumTransaction() {
      return this.minimumTransaction;

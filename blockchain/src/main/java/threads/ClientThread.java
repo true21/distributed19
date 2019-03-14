@@ -22,7 +22,7 @@ public class ClientThread extends Thread {
 	private static int index;
 	private static Socket socket;
 	private static int port;
-	public static final int n = 2;
+	public static  int n;
 
 	public ClientThread(InetAddress i, int c, Socket sock, int prt) {
 		ipAddress = i;
@@ -35,7 +35,7 @@ public class ClientThread extends Thread {
 	public static void main(String[] args) throws IOException {
 		try{
 			index = Integer.parseInt(args[0]);
-
+			n = Integer.parseInt(args[1]);
 			// get all nodes ids
 			ArrayList<Node> nodes = new ArrayList<Node>();
 			ServerSocket ss = new ServerSocket(7070 + index);

@@ -30,16 +30,17 @@ public class ServerThread extends Thread {
     private static InetAddress ipAddress;
     //private static Socket socket;
     private static int port;
-    private static final int n = 2;
+    private static int n;
 
     private String Case;
     private Message Msg;
 
-    public ServerThread(/*Socket sock, String op, InetAddress ip, int prt, */String cs, Message msg, Block block, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
+    public ServerThread(/*Socket sock, String op, InetAddress ip, int prt, */int n, String cs, Message msg, Block block, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
   		//this.socket = sock;
       //this.operation = op;
       //this.ipAddress = ip;
       //this.port = prt;
+      this.n = n;
       this.Case = cs;
       this.Msg = msg;
       this.myBlock = block;
@@ -56,6 +57,9 @@ public class ServerThread extends Thread {
           InetAddress myIp = InetAddress.getByName(args[0]);
           int myPort = Integer.parseInt(args[1]);
           InetAddress bootIp = InetAddress.getByName(args[2]);
+          n = Integer.parseInt(args[3]);
+          int dif = Integer.parseInt(args[4]);
+          int max = Integer.parseInt(args[5]);
           miner = new NodeMiner(-1, myIp, myPort);
           // cases not_bootstrap, bootstrap below
           if (myPort != 10000) {
@@ -100,7 +104,7 @@ public class ServerThread extends Thread {
           else {
             // Bootstrap node here
             miner.setIndex(0);
-            blockchain = new Blockchain();
+            blockchain = new Blockchain(dif,max);
             Node node = new Node(0, myIp, myPort, miner.getWallet().getPublicKey());
             nodes.add(node);
             Wallet w = new Wallet();
@@ -290,7 +294,7 @@ public class ServerThread extends Thread {
               }
               else {
                 Message msg = new Message("transaction", tran);
-                Thread t = new ServerThread("broadcast", msg, block, blockchain, miner, nodes);
+                Thread t = new ServerThread(n,"broadcast", msg, block, blockchain, miner, nodes);
                 t.start();
                 /*for (int i=0; i<nodes.size(); i++) {
                   Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
@@ -313,7 +317,7 @@ public class ServerThread extends Thread {
               block.addTransaction(message.getTransaction(), blockchain);
               System.out.println("message.getTransaction().value " + message.getTransaction().value);
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
-                Thread t = new ServerThread("aek", null, block, blockchain, miner, nodes);
+                Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
                 keepGoing = true;
                 t.start();
                 // create new block with invalid previous hash
@@ -333,7 +337,7 @@ public class ServerThread extends Thread {
                 blockchain.getBlockchain().remove(blockchain.getBlockchain().size()-1);
                 // consensus
                 Message cons_msg = new Message("consensus");
-                Thread t = new ServerThread("broadcast", cons_msg, block, blockchain, miner, nodes);
+                Thread t = new ServerThread(n,"broadcast", cons_msg, block, blockchain, miner, nodes);
                 t.start();
                 /*for (int i=0; i<nodes.size(); i++) {
                   Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
