@@ -93,7 +93,6 @@ public class Transaction implements Serializable {
       //gather transaction inputs (Make sure they are unspent):
       for(TransactionInput i : transaction_inputs) {
         i.UTXO = blockchain.getUTXOs().get(i.transactionOutputId);
-        System.out.println("******************************input.UTXO = " + i.UTXO); // is null
       }
 
       //check if transaction is valid:
@@ -104,14 +103,12 @@ public class Transaction implements Serializable {
 
       //generate transaction outputs:
       float leftOver = getInputsValue() - value; //get value of inputs then the left over change:
-      System.out.println("????????????????????????? leftOver = " + leftOver);
       transaction_id = calulateHash();
       transaction_outputs.add(new TransactionOutput( this.receiver_address, value,transaction_id)); //send value to recipient
       transaction_outputs.add(new TransactionOutput( this.sender_address, leftOver,transaction_id)); //send the left over 'change' back to sender
 
       //add outputs to Unspent list
       for(TransactionOutput o : transaction_outputs) {
-        System.out.println("555555555555555555555555555 MPHKA STO O.ID" + o.id);
         blockchain.getUTXOs().put(o.id , o);
       }
 

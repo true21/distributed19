@@ -111,10 +111,13 @@ public class Wallet implements Serializable {
      * @return
      */
     public Transaction sendFunds(PublicKey _recipient, float value, Blockchain blockchain/*HashMap<String,TransactionOutput> allUTXOs*/) {
+      System.out.println("My balance is: " + getBalanceClient(blockchain) + ", and I wanna send: " + value);
+
       if(getBalance(blockchain) < value) { //gather balance and check funds.
         System.out.println("#Not Enough funds to send transaction. Transaction Discarded.");
         return null;
       }
+      System.out.println("#Enough funds to send transaction. Transaction not Discarded.");
       //create array list of inputs
       ArrayList<TransactionInput> inputs = new ArrayList<TransactionInput>();
 

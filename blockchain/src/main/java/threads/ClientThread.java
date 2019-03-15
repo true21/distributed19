@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Scanner;
 import java.security.*;
+import java.util.concurrent.*;
 
 public class ClientThread extends Thread {
 
@@ -67,7 +68,7 @@ public class ClientThread extends Thread {
 
 
 			// send 100 noobcash coins to others if Bootstrap
-			if (index == 0) {			
+			if (index == 0) {
 				for (int i=1; i<nodes.size(); i++) {
 					String tr100 = "t ";
 					tr100 += i + " 100";
@@ -83,13 +84,13 @@ public class ClientThread extends Thread {
 					//oos.close();
 				}
 				// say to others client's that they're ready to go
-				for (int i=1; i<nodes.size(); i++) {
+			/*	for (int i=1; i<nodes.size(); i++) {
 					System.out.println("Connecting7 to " + 11000 + i);
 					Socket s_ready = new Socket(nodes.get(i).getIP(), 11000 + i);
 					System.out.println("Connected8");
 					s_ready.close();
-				}
-			}
+				}*/
+			}/*
 			else {
 
 				ServerSocket ss_readyy = new ServerSocket(11000 + index);
@@ -99,7 +100,12 @@ public class ClientThread extends Thread {
 				System.out.println("Accepting10");
 				s_readyy.close();
 				ss_readyy.close();
-			}
+			}*/
+			// be notified that 100 nbc coins have arrived everywhere
+			ServerSocket ss_readyy2 = new ServerSocket(11000 + index);
+			Socket s_readyy2 = ss_readyy2.accept();
+			s_readyy2.close();
+			ss_readyy2.close();
 
 			// file
 			String file = "../../resources/main/transactions/" + n + "nodes/transactions" + index + ".txt";
@@ -115,6 +121,7 @@ public class ClientThread extends Thread {
 				String transMsg = (String) ois.readObject();
 				System.out.println(transMsg);
 				s.close();
+				TimeUnit.MILLISECONDS.sleep(200);
   		}
 
 			// get input from console
