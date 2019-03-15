@@ -181,7 +181,7 @@ public class ServerThread extends Thread {
           }
           // send nodes list to client so he can broadcast
           //System.exit(0);
-          int poort = 7070 + miner.getIndex();
+          int poort = 11000 + miner.getIndex();
           System.out.println("Connecting15 to " + poort);
           Socket socket_cli = new Socket(myIp, poort);
           System.out.println("Connected16");
@@ -230,7 +230,7 @@ public class ServerThread extends Thread {
             Message message = (Message) ois.readObject();
             if (message.getType().equals("balance")) {
               oos = new ObjectOutputStream(s_cli.getOutputStream());
-              float balance = miner.getWallet().getBalance(blockchain);
+              float balance = miner.getWallet().getBalanceClient(blockchain);
               oos.writeObject(Float.toString(balance));
               if(s_cli.getInputStream().read()==-1){
                 s_cli.close();
@@ -316,7 +316,9 @@ public class ServerThread extends Thread {
               System.out.println("transaction value: " + message.getTransaction().value);
               block.addTransaction(message.getTransaction(), blockchain);
               System.out.println("message.getTransaction().value " + message.getTransaction().value);
+              System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAX TRANSACTIONS = " + blockchain.getMaxTrans());
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
+                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ BLOCK COMPLETE");
                 Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
                 keepGoing = true;
                 t.start();
@@ -335,10 +337,12 @@ public class ServerThread extends Thread {
               if (!isValid) {
                 System.out.println("block in not valid");
                 blockchain.getBlockchain().remove(blockchain.getBlockchain().size()-1);
-                // consensus
+                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@ ΒΛΟΨΚ ΡΕΜΟΩΕΔ !!!!!!!!!!!!!!!!!!!!!");
+                /*// consensus
                 Message cons_msg = new Message("consensus");
+                System.out.println("+++++++++++++++++++++++++++++++++FWNAZW CONSENSUS");
                 Thread t = new ServerThread(n,"broadcast", cons_msg, block, blockchain, miner, nodes);
-                t.start();
+                t.start();*/
                 /*for (int i=0; i<nodes.size(); i++) {
                   Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
                   oos = new ObjectOutputStream(s.getOutputStream());
@@ -346,11 +350,12 @@ public class ServerThread extends Thread {
                 }*/
               }
               else {
-                System.out.println("block in valid");
+                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@ ΒΛΟΨΚ ΑΔΔΕΔ !!!!!!!!!!!!!!!!!!!!!");
                 block.setPreviousHash(message.getBlock().getHash());
               }
             }
             else if (message.getType().equals("consensus")) {
+              System.out.println("+++++++++++++++++++++++++++++++++RECEIVED CONSENSUS");
               s_cli.close();
               Message bc_msg = new Message("blockchain", blockchain);
               for (int i=0; i<nodes.size(); i++) {
@@ -365,6 +370,7 @@ public class ServerThread extends Thread {
               }
             }
             else if (message.getType().equals("blockchain")) {
+              System.out.println("+++++++++++++++++++++++++++++++++RECEIVED BLOCKCHAIN");
               s_cli.close();
               if (blockchain.getBlockchain().size() < message.getBlockchain().getBlockchain().size()) {
                 blockchain = message.getBlockchain();
@@ -411,10 +417,12 @@ public class ServerThread extends Thread {
           for (int i=0; i<nodes.size(); i++) {
             Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+            if (Msg.getType().equals("consensus")) System.out.println("~~~~~~~~~~~~~~~~~~~~~~~BROADCASTING CONSENSUS " + i);
             oos.writeObject(Msg);
+            if (Msg.getType().equals("consensus")) System.out.println("~~~~~~~~~~~~~~~~~~~~~~~BROADCASTED CONSENSUS " + i);
             if(s.getInputStream().read()==-1){
               s.close();
-              System.out.println("server socket close");
+              System.out.println(Msg.getType() + " broadcast socket close, rep: " + i);
             }
           }
         }
@@ -429,7 +437,7 @@ public class ServerThread extends Thread {
           int count = 0;
           int cnt = miner.getIndex();
   	    	while(keepGoing) {
-            if (count%50 == 0) System.out.println("mining...");
+            //if (count%50 == 0) System.out.println("mining...");
             count++;
             cnt += n;
   	    		//rand_int1 = rand.nextInt(2147483647); //or nonce++

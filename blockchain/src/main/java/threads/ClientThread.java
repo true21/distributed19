@@ -38,8 +38,8 @@ public class ClientThread extends Thread {
 			n = Integer.parseInt(args[1]);
 			// get all nodes ids
 			ArrayList<Node> nodes = new ArrayList<Node>();
-			ServerSocket ss = new ServerSocket(7070 + index);
-			System.out.println("Listening1 to " + 7070 + index);
+			ServerSocket ss = new ServerSocket(11000 + index);
+			System.out.println("Listening1 to " + 11000 + index);
       Socket s_nodeId = ss.accept();
 			System.out.println("Accepting2");
 			ObjectInputStream ois = new ObjectInputStream(s_nodeId.getInputStream());
@@ -67,9 +67,9 @@ public class ClientThread extends Thread {
 
 
 			// send 100 noobcash coins to others if Bootstrap
-			if (index == 0) {
-				String tr100 = "t ";
+			if (index == 0) {			
 				for (int i=1; i<nodes.size(); i++) {
+					String tr100 = "t ";
 					tr100 += i + " 100";
 					Message mes = new Message(tr100);
 					System.out.println("Connecting5 to " + port);
@@ -84,16 +84,16 @@ public class ClientThread extends Thread {
 				}
 				// say to others client's that they're ready to go
 				for (int i=1; i<nodes.size(); i++) {
-					System.out.println("Connecting7 to " + 7070 + i);
-					Socket s_ready = new Socket(nodes.get(i).getIP(), 7070 + i);
+					System.out.println("Connecting7 to " + 11000 + i);
+					Socket s_ready = new Socket(nodes.get(i).getIP(), 11000 + i);
 					System.out.println("Connected8");
 					s_ready.close();
 				}
 			}
 			else {
 
-				ServerSocket ss_readyy = new ServerSocket(7070 + index);
-				System.out.println("Listening9 to " + 7070 + index);
+				ServerSocket ss_readyy = new ServerSocket(11000 + index);
+				System.out.println("Listening9 to " + 11000 + index);
 				// be notified when you're ready to go
 	      Socket s_readyy = ss_readyy.accept();
 				System.out.println("Accepting10");
@@ -101,11 +101,8 @@ public class ClientThread extends Thread {
 				ss_readyy.close();
 			}
 
-			// get input from console
-			Scanner scanner = new Scanner(System.in);
-/*
 			// file
-			String file = "../../resources/transactions/" + n + "nodes/transactions" + index + ".txt";
+			String file = "../../resources/main/transactions/" + n + "nodes/transactions" + index + ".txt";
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line;
   		while ((line = br.readLine()) != null) {
@@ -114,8 +111,15 @@ public class ClientThread extends Thread {
 				String toSend = "t " + line.replace("id", "");
 				Message message = new Message(toSend);
 				oos.writeObject(message);
+				ois = new ObjectInputStream(s.getInputStream());
+				String transMsg = (String) ois.readObject();
+				System.out.println(transMsg);
+				s.close();
   		}
-*/
+
+			// get input from console
+			Scanner scanner = new Scanner(System.in);
+
 			// cli
 			while (true) {
 				// read line

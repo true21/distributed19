@@ -85,7 +85,19 @@ public class Wallet implements Serializable {
         TransactionOutput UTXO = item.getValue();
         if(UTXO.isMine(publicKey)) { //if output belongs to me ( if coins belong to me )
           UTXOs.put(UTXO.id,UTXO); //add it to our list of unspent transactions.
-          total += UTXO.value ;
+          total += UTXO.value;
+          System.out.println("UTXO.value = " + UTXO.value);
+        }
+      }
+      return total;
+    }
+
+    public float getBalanceClient(Blockchain blockchain) {
+      float total = 0;
+      for (Map.Entry<String, TransactionOutput> item: blockchain.getUTXOs().entrySet()){
+        TransactionOutput UTXO = item.getValue();
+        if(UTXO.isMine(publicKey)) { //if output belongs to me ( if coins belong to me )
+          total += UTXO.value;
         }
       }
       return total;
@@ -106,18 +118,13 @@ public class Wallet implements Serializable {
       //create array list of inputs
       ArrayList<TransactionInput> inputs = new ArrayList<TransactionInput>();
 
-      boolean aek = true;
       float total = 0;
       for (Map.Entry<String, TransactionOutput> item: UTXOs.entrySet()) {
-        aek = false;
         TransactionOutput UTXO = item.getValue();
         total += UTXO.value;
         inputs.add(new TransactionInput(UTXO.id));
         if(total > value) break;
       }
-
-      if (aek) System.out.println("----------------------NEVER GOT IN HERE");
-      else System.out.println("----------------------GOT IN HERE");
 
       Transaction newTransaction = new Transaction(publicKey, _recipient , value, inputs);
       newTransaction.generateSignature(privateKey);
