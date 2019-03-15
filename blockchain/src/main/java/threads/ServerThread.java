@@ -35,6 +35,9 @@ public class ServerThread extends Thread {
     private String Case;
     private Message Msg;
 
+    private static ArrayList<Transaction> trans_pool = new ArrayList<Transaction>();
+    private static int cons_block = 0;
+
     public ServerThread(/*Socket sock, String op, InetAddress ip, int prt, */int n, String cs, Message msg, Block block, Blockchain blockchain, NodeMiner miner, ArrayList<Node> nodes){
   		//this.socket = sock;
       //this.operation = op;
@@ -373,14 +376,68 @@ public class ServerThread extends Thread {
               System.out.println("+++++++++++++++++++++++++++++++++RECEIVED BLOCKCHAIN");
               s_cli.close();
               if (blockchain.getBlockchain().size() < message.getBlockchain().getBlockchain().size()) {
+//////peirazwwww
+                HashMap<String,Transaction> received_trans = new HashMap<String,Transaction>();
+                for( int i=cons_block; i<message.getBlockchain().getBlockchain().size();i++){ //for every block
+                  for(int j=0; j<message.getBlockchain().getMaxTrans(); j++){ //for every trans
+                    Transaction temptran = message.getBlockchain().getBlockchain().get(i).getTrans().get(j);
+                     received_trans.put(temptran.getTransId() , temptran);
+                  }
+                }
+                for( int i=cons_block; i<blockchain.getBlockchain().size();i++){ //for every block
+                  for(int j=0; j<blockchain.getMaxTrans(); j++){ //for every trans
+                    Transaction temptran = blockchain.getBlockchain().get(i).getTrans().get(j);
+                    if(received_trans.get(temptran.getTransId()) == null){
+                      trans_pool.add(temptran);
+                    }
+                  }
+                }
                 blockchain = message.getBlockchain();
+                cons_block = blockchain.getBlockchain().size(); //for trans pool
+                //block = new Block("21");
               }
               else if (blockchain.getBlockchain().size() == message.getBlockchain().getBlockchain().size()) {
                 int comp_str = blockchain.getBlockchain().toString().compareTo(message.getBlockchain().toString());
-                if (comp_str > 0) {
+                if (comp_str > 0) { //peiraksa
+                  HashMap<String,Transaction> received_trans = new HashMap<String,Transaction>();
+                  for( int i=cons_block; i<message.getBlockchain().getBlockchain().size();i++){ //for every block
+                    for(int j=0; j<message.getBlockchain().getMaxTrans(); j++){ //for every trans
+                      Transaction temptran = message.getBlockchain().getBlockchain().get(i).getTrans().get(j);
+                       received_trans.put(temptran.getTransId() , temptran);
+                    }
+                  }
+                  for( int i=cons_block; i<blockchain.getBlockchain().size();i++){ //for every block
+                    for(int j=0; j<blockchain.getMaxTrans(); j++){ //for every trans
+                      Transaction temptran = blockchain.getBlockchain().get(i).getTrans().get(j);
+                      if(received_trans.get(temptran.getTransId()) == null){
+                        trans_pool.add(temptran);
+                      }
+                    }
+                  }
                   blockchain = message.getBlockchain();
                 }
+                cons_block = blockchain.getBlockchain().size(); //for trans pool
+              } //begin new block with trans pool ->peiraksa
+              if(trans_pool != null){
+                for(int i = 0; i<trans_pool.size(); i++){
+                  block.addTransaction(trans_pool.get(i), blockchain);
+                  System.out.println("trans_pool(i).value " + trans_pool.get(i).value);
+                  if (block.getTrans().size() == blockchain.getMaxTrans()) {
+                    for(int j=0; j<=i; j++){
+                      trans_pool.remove(0); //adeiaze to pool oso ta xrhsimopoieis
+                    }
+                    System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ BLOCK COMPLETE");
+                    Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
+                    keepGoing = true;
+                    t.start();
+                    // create new block with invalid previous hash
+                    // gonna fix it when its previous enters blockchain
+                    block = new Block("21");
+                    break;
+                  }
+                }
               }
+
             }
             else if (message.getType().equals("this")) {
               // do this
