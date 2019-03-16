@@ -223,6 +223,8 @@ public class ServerThread extends Thread {
           int count100 = 0;
           Block block = new Block(blockchain.getBlockchain().get(0).getHash());
           boolean ownTransaction = false;
+          boolean ownBlock = false;
+          boolean ownConsensus = false;
           // now server waits to receive (transactions, blocks, etc)
           ServerSocket ss_await = new ServerSocket(myPort);
           while (true) {
@@ -347,6 +349,7 @@ public class ServerThread extends Thread {
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
                 blockchain.addBlock(block, miner);
                 message = new Message("block", block);
+                ownBlock = true;
                 Thread t = new ServerThread(n,"broadcast", message, block, blockchain, miner, nodes);
                 t.start();
                 //block.setPreviousHash(blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1).getHash());
@@ -359,17 +362,22 @@ public class ServerThread extends Thread {
               }
             }
             if (message.getType().equals("block")) {
-              s_cli.close();
+              if (ownBlock)
+                ownBlock = false;
+              else
+                s_cli.close();
               //keepGoing = false;
               blockchain.getBlockchain().add(message.getBlock());
               boolean isValid = blockchain.isValid();
               if (!isValid) {
                 blockchain.getBlockchain().remove(blockchain.getBlockchain().size()-1);
-                /*// consensus
-                Message cons_msg = new Message("consensus");
+                // consensus
+                /*Message cons_msg = new Message("consensus");
                 System.out.println("+++++++++++++++++++++++++++++++++FWNAZW CONSENSUS");
                 Thread t = new ServerThread(n,"broadcast", cons_msg, block, blockchain, miner, nodes);
-                t.start();*/
+                t.start();
+                message = cons_msg;
+                ownConsensus = true;*/
                 /*for (int i=0; i<nodes.size(); i++) {
                   Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
                   oos = new ObjectOutputStream(s.getOutputStream());
@@ -381,9 +389,14 @@ public class ServerThread extends Thread {
               }*/
             }
             if (message.getType().equals("consensus")) {
-              s_cli.close();
+              if (ownConsensus)
+                ownConsensus = false;
+              else
+                s_cli.close();
               Message bc_msg = new Message("blockchain", blockchain);
-              for (int i=0; i<nodes.size(); i++) {
+              Thread t = new ServerThread(n,"broadcast", bc_msg, block, blockchain, miner, nodes);
+              t.start();
+            /*  for (int i=0; i<nodes.size(); i++) {
                 if (i == miner.getIndex()) continue;
                 Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
                 oos = new ObjectOutputStream(s.getOutputStream());
@@ -391,12 +404,12 @@ public class ServerThread extends Thread {
                 if(s.getInputStream().read()==-1){
                   s.close();
                 }
-              }
+              } */
             }
             if (message.getType().equals("blockchain")) {
               s_cli.close();
               if (blockchain.getBlockchain().size() < message.getBlockchain().getBlockchain().size()) {
-//////peirazwwww
+/*//////peirazwwww
                 HashMap<String,Transaction> received_trans = new HashMap<String,Transaction>();
                 for( int i=cons_block; i<message.getBlockchain().getBlockchain().size();i++){ //for every block
                   for(int j=0; j<message.getBlockchain().getMaxTrans(); j++){ //for every trans
@@ -411,7 +424,7 @@ public class ServerThread extends Thread {
                       trans_pool.add(temptran);
                     }
                   }
-                }
+                }*/
                 blockchain = message.getBlockchain();
                 cons_block = blockchain.getBlockchain().size(); //for trans pool
                 //block = new Block("21");
@@ -419,7 +432,7 @@ public class ServerThread extends Thread {
               else if (blockchain.getBlockchain().size() == message.getBlockchain().getBlockchain().size()) {
                 int comp_str = blockchain.getBlockchain().toString().compareTo(message.getBlockchain().toString());
                 if (comp_str > 0) { //peiraksa
-                  HashMap<String,Transaction> received_trans = new HashMap<String,Transaction>();
+                  /*HashMap<String,Transaction> received_trans = new HashMap<String,Transaction>();
                   for( int i=cons_block; i<message.getBlockchain().getBlockchain().size();i++){ //for every block
                     for(int j=0; j<message.getBlockchain().getMaxTrans(); j++){ //for every trans
                       Transaction temptran = message.getBlockchain().getBlockchain().get(i).getTrans().get(j);
@@ -433,12 +446,12 @@ public class ServerThread extends Thread {
                         trans_pool.add(temptran);
                       }
                     }
-                  }
+                  }*/
                   blockchain = message.getBlockchain();
                 }
                 cons_block = blockchain.getBlockchain().size(); //for trans pool
               } //begin new block with trans pool ->peiraksa
-              if(trans_pool != null){
+              /*if(trans_pool != null){
                 for(int i = 0; i<trans_pool.size(); i++){
                   block.addTransaction(trans_pool.get(i), blockchain, true);
                   System.out.println("trans_pool(i).value " + trans_pool.get(i).value);
@@ -447,16 +460,15 @@ public class ServerThread extends Thread {
                       trans_pool.remove(0); //adeiaze to pool oso ta xrhsimopoieis
                     }
                     System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ BLOCK COMPLETE");
-                    Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
-                    //keepGoing = true;
+                    blockchain.addBlock(block, miner);
+                    msg = new Message("block", block);
+                    Thread t = new ServerThread(n,"broadcast", msg, block, blockchain, miner, nodes);
                     t.start();
-                    // create new block with invalid previous hash
-                    // gonna fix it when its previous enters blockchain
-                    block = new Block("21");
+                    block = new Block(block.getHash());
                     break;
                   }
                 }
-              }
+              } */
 
             }
             if (message.getType().equals("this")) {
