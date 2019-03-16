@@ -108,6 +108,20 @@ public class Transaction implements Serializable {
       transaction_outputs.add(new TransactionOutput( this.sender_address, leftOver,transaction_id)); //send the left over 'change' back to sender
 
       //add outputs to Unspent list
+      /*for(TransactionOutput o : transaction_outputs) {
+        blockchain.getUTXOs().put(o.id , o);
+      }
+
+      //remove transaction inputs from UTXO lists as spent:
+      for(TransactionInput i : transaction_inputs) {
+        if(i.UTXO == null) continue; //if Transaction can't be found skip it
+        blockchain.getUTXOs().remove(i.UTXO.id);
+      } */
+
+      return true;
+    }
+
+    public void pT (Blockchain blockchain) {
       for(TransactionOutput o : transaction_outputs) {
         blockchain.getUTXOs().put(o.id , o);
       }
@@ -117,8 +131,6 @@ public class Transaction implements Serializable {
         if(i.UTXO == null) continue; //if Transaction can't be found skip it
         blockchain.getUTXOs().remove(i.UTXO.id);
       }
-
-      return true;
     }
 
     //returns sum of inputs(UTXOs) values

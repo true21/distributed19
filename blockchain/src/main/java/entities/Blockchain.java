@@ -58,7 +58,7 @@ public class Blockchain implements Serializable {
           newBlock.setHash(newBlock.calculateHash());
           //newBlock.setHash("qwerty");
         }
-  		  blockchain.add(newBlock);
+  		  //blockchain.add(newBlock);
       }  catch (Exception e) { e.printStackTrace();}
     }
 
@@ -107,7 +107,8 @@ public class Blockchain implements Serializable {
     					return false;
     				}
     				if(currentTransaction.getInputsValue() != currentTransaction.getOutputsValue()) {
-    					System.out.println("#Inputs are note equal to outputs on Transaction(" + t + ")");
+    					System.out.println("#Inputs are not equal to outputs on Transaction(" + t + ") at block " + i);
+              System.out.println("Input is: " + currentTransaction.getInputsValue() + ", and Output is: " + currentTransaction.getOutputsValue());
     					return false;
     				}
 

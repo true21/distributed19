@@ -61,11 +61,15 @@ public class Block implements Serializable {
      * todo:
      * Function that adds a Transaction on the current block if it is valid
      */
-    public boolean addTransaction(Transaction transaction, Blockchain blockchain) {
+    public boolean addTransaction(Transaction transaction, Blockchain blockchain, boolean creator) {
     	if(transaction == null) return false;
     	if(!(previousHash.equals("1"))) {
-	    	boolean success = transaction.processTransaction(blockchain);
+        boolean success;
+	    	if (creator) success = transaction.processTransaction(blockchain);
+        else success = true;
+
 	    	if(success) {
+          transaction.pT(blockchain);
 	    		transactions.add(transaction);
 	    		System.out.println("Transaction Successfully added to Block");
           return true;

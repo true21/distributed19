@@ -121,7 +121,7 @@ public class ClientThread extends Thread {
 				String transMsg = (String) ois.readObject();
 				System.out.println(transMsg);
 				s.close();
-				TimeUnit.MILLISECONDS.sleep(200);
+				//TimeUnit.MILLISECONDS.sleep(200);
   		}
 
 			// get input from console

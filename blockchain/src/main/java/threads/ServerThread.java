@@ -118,8 +118,9 @@ public class ServerThread extends Thread {
             gen_trans.setTransOut(node.getPublicKey(), (float) 100.0*n, gen_trans.getTransId());
             blockchain.setUTXOs(gen_trans.getTransOut().get(0).getId(), gen_trans.getTransOut().get(0));
             Block gen_block = new Block();
-            gen_block.addTransaction(gen_trans, blockchain);
+            gen_block.addTransaction(gen_trans, blockchain, true);
             blockchain.addBlock(gen_block, miner);
+            blockchain.getBlockchain().add(gen_block);
             ServerSocket listener = new ServerSocket(10000);
             List<Socket> sockets = new ArrayList<Socket>();
             List<ObjectOutputStream> outputs = new ArrayList<ObjectOutputStream>();
@@ -229,7 +230,9 @@ public class ServerThread extends Thread {
             Socket s_cli = ss_await.accept();
             System.out.println("Accepting20");
             ObjectInputStream ois = new ObjectInputStream(s_cli.getInputStream());
+
             Message message = (Message) ois.readObject();
+            System.out.println("Stuck at reading");
             if (message.getType().equals("balance")) {
               oos = new ObjectOutputStream(s_cli.getOutputStream());
               float balance = miner.getWallet().getBalanceClient(blockchain);
@@ -293,6 +296,7 @@ public class ServerThread extends Thread {
               }
               else {
                 Message msg = new Message("transaction", tran);
+                block.addTransaction(tran, blockchain, true);
                 Thread t = new ServerThread(n,"broadcast", msg, block, blockchain, miner, nodes);
                 t.start();
                 /*for (int i=0; i<nodes.size(); i++) {
@@ -314,12 +318,26 @@ public class ServerThread extends Thread {
             if (message.getType().equals("transaction")) {
               if (ownTransaction)
                 ownTransaction = false;
-              else
+              else {
                 s_cli.close();
+                block.addTransaction(message.getTransaction(), blockchain, false);
+              }
+
               if (message.getTransaction().value == 100f) {
                 count100++;
               }
-              block.addTransaction(message.getTransaction(), blockchain);
+
+              PublicKey sKey2 = message.getTransaction().getSendAddr();
+              PublicKey rKey2 = message.getTransaction().getRecAddr();
+              int sk2 = -1;
+              int rk2 = -1;
+              for (int j=0; j<nodes.size(); j++) {
+                if (nodes.get(j).getPublicKey().equals(sKey2))
+                  sk2 = j;
+                if (nodes.get(j).getPublicKey().equals(rKey2))
+                  rk2 = j;
+              }
+              System.out.println("Sender is: " + sk2 + " and Receiver is: " + rk2);
               if (count100 == n-1) {
                 Socket s_ready2 = new Socket(nodes.get(miner.getIndex()).getIP(), 11000 + miner.getIndex());
       					System.out.println("Connected100");
@@ -327,17 +345,22 @@ public class ServerThread extends Thread {
                 count100++;
               }
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
-                Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
-                keepGoing = true;
+                blockchain.addBlock(block, miner);
+                message = new Message("block", block);
+                Thread t = new ServerThread(n,"broadcast", message, block, blockchain, miner, nodes);
                 t.start();
+                //block.setPreviousHash(blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1).getHash());
+                /*Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
+                //keepGoing = true;
+                t.start();*/
                 // create new block with invalid previous hash
                 // gonna fix it when its previous enters blockchain
-                block = new Block("21");
+                block = new Block(block.getHash());
               }
             }
             if (message.getType().equals("block")) {
               s_cli.close();
-              keepGoing = false;
+              //keepGoing = false;
               blockchain.getBlockchain().add(message.getBlock());
               boolean isValid = blockchain.isValid();
               if (!isValid) {
@@ -352,10 +375,10 @@ public class ServerThread extends Thread {
                   oos = new ObjectOutputStream(s.getOutputStream());
                   oos.writeObject(cons_msg);
                 }*/
-              }
+              }/*
               else {
                 block.setPreviousHash(message.getBlock().getHash());
-              }
+              }*/
             }
             if (message.getType().equals("consensus")) {
               s_cli.close();
@@ -417,7 +440,7 @@ public class ServerThread extends Thread {
               } //begin new block with trans pool ->peiraksa
               if(trans_pool != null){
                 for(int i = 0; i<trans_pool.size(); i++){
-                  block.addTransaction(trans_pool.get(i), blockchain);
+                  block.addTransaction(trans_pool.get(i), blockchain, true);
                   System.out.println("trans_pool(i).value " + trans_pool.get(i).value);
                   if (block.getTrans().size() == blockchain.getMaxTrans()) {
                     for(int j=0; j<=i; j++){
@@ -425,7 +448,7 @@ public class ServerThread extends Thread {
                     }
                     System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ BLOCK COMPLETE");
                     Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
-                    keepGoing = true;
+                    //keepGoing = true;
                     t.start();
                     // create new block with invalid previous hash
                     // gonna fix it when its previous enters blockchain
@@ -469,8 +492,7 @@ public class ServerThread extends Thread {
       try{
         if (Case.equals("broadcast")) {
           for (int i=0; i<nodes.size(); i++) {
-            if (Msg.getType().equals("transaction") && i == miner.getIndex())
-              continue;
+            if (i == miner.getIndex()) continue;
             Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
             oos.writeObject(Msg);
@@ -489,7 +511,7 @@ public class ServerThread extends Thread {
           boolean win = false;
           int count = 0;
           int cnt = miner.getIndex();
-  	    	while(keepGoing) {
+  	    	while(true/*keepGoing*/) {
             //if (count%50 == 0) System.out.println("mining...");
             count++;
             cnt += n;
