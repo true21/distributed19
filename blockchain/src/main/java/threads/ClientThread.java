@@ -40,9 +40,9 @@ public class ClientThread extends Thread {
 			// get all nodes ids
 			ArrayList<Node> nodes = new ArrayList<Node>();
 			ServerSocket ss = new ServerSocket(11000 + index);
-			System.out.println("Listening1 to " + 11000 + index);
+			//System.out.println("Listening1 to " + 11000 + index);
       Socket s_nodeId = ss.accept();
-			System.out.println("Accepting2");
+			//System.out.println("Accepting2");
 			ObjectInputStream ois = new ObjectInputStream(s_nodeId.getInputStream());
 			Node temp_node;
 			for (int i=0; i<n; i++) {
@@ -52,7 +52,7 @@ public class ClientThread extends Thread {
 			//System.out.println("hey with listsize " + nodes.size());
 			s_nodeId.close();
 			ss.close();
-			System.out.println("server socket close");
+			//System.out.println("server socket close");
 			// check if you can connect to all servers
 			/*for (int i=0; i<nodes.size(); i++) {
 				System.out.println("Connecting3 to " + nodes.get(i).getPort());
@@ -73,9 +73,9 @@ public class ClientThread extends Thread {
 					String tr100 = "t ";
 					tr100 += i + " 100";
 					Message mes = new Message(tr100);
-					System.out.println("Connecting5 to " + port);
+					//System.out.println("Connecting5 to " + port);
 					Socket s100 = new Socket(ip, port);
-					System.out.println("Connected6");
+					//System.out.println("Connected6");
 					ObjectOutputStream oos = new ObjectOutputStream(s100.getOutputStream());
 					oos.writeObject(mes);
 					ObjectInputStream ms = new ObjectInputStream(s100.getInputStream());
@@ -121,9 +121,43 @@ public class ClientThread extends Thread {
 				String transMsg = (String) ois.readObject();
 				System.out.println(transMsg);
 				s.close();
-				TimeUnit.MILLISECONDS.sleep(200);
+				TimeUnit.MILLISECONDS.sleep(500);
   		}
 
+			if(index==0){
+				System.out.println("Sleeping..");
+				TimeUnit.SECONDS.sleep(45);
+				System.out.println("woke up");
+				for (int i=1; i<nodes.size(); i++) {
+						System.out.println("Connecting7 to " + 11000 + i);
+						Socket s_ready = new Socket(nodes.get(i).getIP(), 11000 + i);
+						//System.out.println("Connected8");
+						s_ready.close();
+				}
+			}
+			else {
+				ServerSocket ss_readyy = new ServerSocket(11000 + index);
+				System.out.println("Listening9 to " + 11000 + index);
+				// be notified when you're ready to go
+	      Socket s_readyy = ss_readyy.accept();
+				//System.out.println("Accepting10");
+				s_readyy.close();
+				ss_readyy.close();
+			}
+
+
+			Message endmes = new Message("allDone");
+			//System.out.println("ConnectingEnd1 to " + port);
+			Socket ends = new Socket(ip, port);
+			//System.out.println("ConnectedEnd2");
+			ObjectOutputStream endoos = new ObjectOutputStream(ends.getOutputStream());
+			endoos.writeObject(endmes);
+			if(ends.getInputStream().read()==-1){
+				ends.close();
+			}
+			System.out.println("Sleeping..");
+			TimeUnit.SECONDS.sleep(3);
+			System.out.println("woke up");
 			// get input from console
 			Scanner scanner = new Scanner(System.in);
 
@@ -131,15 +165,15 @@ public class ClientThread extends Thread {
 			while (true) {
 				// read line
 				String command = scanner.nextLine();
-				System.out.println("Connecting21 to " + port);
+				//System.out.println("Connecting21 to " + port);
 				Socket s = new Socket(ip, port);
-				System.out.println("Connected22");
+				//System.out.println("Connected22");
 				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				String sendToServer = new String("");
-				String help = "explain stuff";
+				String help = "balance: see wallet\nview: see last block's transactions\nt <recipient_address> <amount>: send amount to recipient_address";
 				String error = "Bad syntax.";
 				List<String> cmd_args = Arrays.asList(command.trim().split("\\s+"));
-				System.out.println("gave " + cmd_args.get(0));
+				//System.out.println("gave " + cmd_args.get(0));
 				if (cmd_args.size() == 1) {
 					if (cmd_args.get(0).equals("view")) {
 						sendToServer = "view";
@@ -179,10 +213,10 @@ public class ClientThread extends Thread {
 					ois = new ObjectInputStream(s.getInputStream());
 					if (sendToServer.equals("balance")) {
 						// balance
-						System.out.println("bal reading");
+						//System.out.println("bal reading");
 						String balance_str = (String) ois.readObject();
 						float balance = Float.parseFloat(balance_str);
-						System.out.println("bal read");
+						//System.out.println("bal read");
 						System.out.println("Your wallet's balance is: " + balance + " noobcash coins.");
 						s.close();
 					}

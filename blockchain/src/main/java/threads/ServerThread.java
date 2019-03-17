@@ -67,9 +67,9 @@ public class ServerThread extends Thread {
           // cases not_bootstrap, bootstrap below
           if (myPort != 10000) {
             // Non-boot nodes here
-            System.out.println("Connecting11 to " + 10000);
+            //System.out.println("Connecting11 to " + 10000);
             Socket socket = new Socket(bootIp, 10000);
-            System.out.println("Connected12");
+            //System.out.println("Connected12");
             System.out.println("Connected to bootstrap node!");
             //System.out.println("Spawning thread for towards bootstrap communication ");
             //Thread t = new ServerThread(soct,"notboot",InetAddress.getByName(args[0]),args[1]);
@@ -102,7 +102,7 @@ public class ServerThread extends Thread {
             //ois.close();
             //t.start();
             socket.close(); /////////////////
-            System.out.println("socket closed");
+            //System.out.println("socket closed");
           }
           else {
             // Bootstrap node here
@@ -126,9 +126,9 @@ public class ServerThread extends Thread {
             List<ObjectOutputStream> outputs = new ArrayList<ObjectOutputStream>();
             int c = 1; // mallon
             while (c<n) {
-                System.out.println("Listening13 to " + 10000);
+                //System.out.println("Listening13 to " + 10000);
                 Socket socket_boot = listener.accept();
-                System.out.println("Accepting14");
+                //System.out.println("Accepting14");
                 sockets.add(socket_boot);
                 System.out.println("Spawning thread for bootstrap incoming communication " );
                 //Thread t = new ServerThread(socket,"boot",InetAddress.getByName(args[0]),args[1]);
@@ -162,7 +162,7 @@ public class ServerThread extends Thread {
             for(int i=0; i<sockets.size(); i++){
               if(sockets.get(i).getInputStream().read()==-1){
                 sockets.get(i).close();
-                System.out.println("server socket close");
+                //System.out.println("server socket close");
               }
             }
             listener.close();
@@ -186,9 +186,9 @@ public class ServerThread extends Thread {
           // send nodes list to client so he can broadcast
           //System.exit(0);
           int poort = 11000 + miner.getIndex();
-          System.out.println("Connecting15 to " + poort);
+          //System.out.println("Connecting15 to " + poort);
           Socket socket_cli = new Socket(myIp, poort);
-          System.out.println("Connected16");
+        //  System.out.println("Connected16");
           ObjectOutputStream oos = new ObjectOutputStream(socket_cli.getOutputStream());
           for(int i=0;i<nodes.size();i++) {
             // broadcast list of nodes ids
@@ -226,13 +226,13 @@ public class ServerThread extends Thread {
           // now server waits to receive (transactions, blocks, etc)
           ServerSocket ss_await = new ServerSocket(myPort);
           while (true) {
-            System.out.println("Listening19 to " + myPort);
+            //System.out.println("Listening19 to " + myPort);
             Socket s_cli = ss_await.accept();
-            System.out.println("Accepting20");
+            //System.out.println("Accepting20");
             ObjectInputStream ois = new ObjectInputStream(s_cli.getInputStream());
-
+            //System.out.println("Stuck at reading");
             Message message = (Message) ois.readObject();
-            System.out.println("Stuck at reading");
+            //System.out.println("Not Stuck at reading");
             if (message.getType().equals("balance")) {
               oos = new ObjectOutputStream(s_cli.getOutputStream());
               float balance = miner.getWallet().getBalanceClient(blockchain);
@@ -337,7 +337,7 @@ public class ServerThread extends Thread {
                 if (nodes.get(j).getPublicKey().equals(rKey2))
                   rk2 = j;
               }
-              System.out.println("Sender is: " + sk2 + " and Receiver is: " + rk2);
+              //System.out.println("Sender is: " + sk2 + " and Receiver is: " + rk2);
               if (count100 == n-1) {
                 Socket s_ready2 = new Socket(nodes.get(miner.getIndex()).getIP(), 11000 + miner.getIndex());
       					System.out.println("Connected100");
@@ -441,12 +441,12 @@ public class ServerThread extends Thread {
               if(trans_pool != null){
                 for(int i = 0; i<trans_pool.size(); i++){
                   block.addTransaction(trans_pool.get(i), blockchain, true);
-                  System.out.println("trans_pool(i).value " + trans_pool.get(i).value);
+                  //System.out.println("trans_pool(i).value " + trans_pool.get(i).value);
                   if (block.getTrans().size() == blockchain.getMaxTrans()) {
                     for(int j=0; j<=i; j++){
                       trans_pool.remove(0); //adeiaze to pool oso ta xrhsimopoieis
                     }
-                    System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ BLOCK COMPLETE");
+                  //  System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ BLOCK COMPLETE");
                     Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
                     //keepGoing = true;
                     t.start();
@@ -459,11 +459,37 @@ public class ServerThread extends Thread {
               }
 
             }
-            if (message.getType().equals("this")) {
+            if (message.getType().equals("allDone")) {
               // do this
+              s_cli.close();
+              Message endbc_msg = new Message("blockchainDone", blockchain);
+              /*for (int i=0; i<nodes.size(); i++) {
+                if (i == miner.getIndex()) continue;
+                Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+                oos = new ObjectOutputStream(s.getOutputStream());
+                oos.writeObject(endbc_msg);
+                if(s.getInputStream().read()==-1){
+                  s.close();
+                }
+              }*/
+              Thread t = new ServerThread(n,"broadcast", endbc_msg, block, blockchain, miner, nodes);
+              t.start();
             }
-            if (message.getType().equals("that")) {
+            if (message.getType().equals("blockchainDone")) {
               // do that
+              s_cli.close();
+              System.out.println("it works");
+              if (blockchain.getBlockchain().size() < message.getBlockchain().getBlockchain().size()) {
+                blockchain = message.getBlockchain();
+                System.out.println("found bigger");
+              }
+              else if (blockchain.getBlockchain().size() == message.getBlockchain().getBlockchain().size()) {
+                int comp_str = blockchain.getBlockchain().toString().compareTo(message.getBlockchain().toString());
+                if (comp_str > 0) {
+                  blockchain = message.getBlockchain();
+                  System.out.println("found better");
+                }
+              }
             }
           }
           /* for(int i=0; i<n; i++) {
