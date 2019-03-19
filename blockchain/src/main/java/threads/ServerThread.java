@@ -481,13 +481,13 @@ public class ServerThread extends Thread {
               System.out.println("it works");
               if (blockchain.getBlockchain().size() < message.getBlockchain().getBlockchain().size()) {
                 blockchain = message.getBlockchain();
-                System.out.println("found bigger");
+                //System.out.println("found bigger");
               }
               else if (blockchain.getBlockchain().size() == message.getBlockchain().getBlockchain().size()) {
                 int comp_str = blockchain.getBlockchain().toString().compareTo(message.getBlockchain().toString());
                 if (comp_str > 0) {
                   blockchain = message.getBlockchain();
-                  System.out.println("found better");
+                  //System.out.println("found better");
                 }
               }
             }

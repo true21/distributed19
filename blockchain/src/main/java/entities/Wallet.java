@@ -86,7 +86,7 @@ public class Wallet implements Serializable {
         if(UTXO.isMine(publicKey)) { //if output belongs to me ( if coins belong to me )
           UTXOs.put(UTXO.id,UTXO); //add it to our list of unspent transactions.
           total += UTXO.value;
-          System.out.println("UTXO.value = " + UTXO.value);
+          //System.out.println("UTXO.value = " + UTXO.value);
         }
       }
       return total;
@@ -111,13 +111,13 @@ public class Wallet implements Serializable {
      * @return
      */
     public Transaction sendFunds(PublicKey _recipient, float value, Blockchain blockchain/*HashMap<String,TransactionOutput> allUTXOs*/) {
-      System.out.println("My balance is: " + getBalanceClient(blockchain) + ", and I wanna send: " + value);
+      //System.out.println("My balance is: " + getBalanceClient(blockchain) + ", and I wanna send: " + value);
 
       if(getBalance(blockchain) < value) { //gather balance and check funds.
         System.out.println("#Not Enough funds to send transaction. Transaction Discarded.");
         return null;
       }
-      System.out.println("#Enough funds to send transaction. Transaction not Discarded.");
+      //System.out.println("#Enough funds to send transaction. Transaction not Discarded.");
       //create array list of inputs
       ArrayList<TransactionInput> inputs = new ArrayList<TransactionInput>();
 

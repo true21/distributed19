@@ -108,6 +108,7 @@ public class ClientThread extends Thread {
 			ss_readyy2.close();
 
 			// file
+			System.out.println("Reading file");
 			String file = "../../resources/main/transactions/" + n + "nodes/transactions" + index + ".txt";
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line;
@@ -119,17 +120,17 @@ public class ClientThread extends Thread {
 				oos.writeObject(message);
 				ois = new ObjectInputStream(s.getInputStream());
 				String transMsg = (String) ois.readObject();
-				System.out.println(transMsg);
+				//System.out.println(transMsg);
 				s.close();
 				TimeUnit.MILLISECONDS.sleep(500);
   		}
 
 			if(index==0){
-				System.out.println("Sleeping..");
-				TimeUnit.SECONDS.sleep(45);
-				System.out.println("woke up");
+				//System.out.println("Sleeping..");
+				TimeUnit.SECONDS.sleep(50);
+				System.out.println("File read");
 				for (int i=1; i<nodes.size(); i++) {
-						System.out.println("Connecting7 to " + 11000 + i);
+						//System.out.println("Connecting7 to " + 11000 + i);
 						Socket s_ready = new Socket(nodes.get(i).getIP(), 11000 + i);
 						//System.out.println("Connected8");
 						s_ready.close();
@@ -137,7 +138,7 @@ public class ClientThread extends Thread {
 			}
 			else {
 				ServerSocket ss_readyy = new ServerSocket(11000 + index);
-				System.out.println("Listening9 to " + 11000 + index);
+				System.out.println("File read");
 				// be notified when you're ready to go
 	      Socket s_readyy = ss_readyy.accept();
 				//System.out.println("Accepting10");
@@ -155,9 +156,9 @@ public class ClientThread extends Thread {
 			if(ends.getInputStream().read()==-1){
 				ends.close();
 			}
-			System.out.println("Sleeping..");
+			//System.out.println("Sleeping..");
 			TimeUnit.SECONDS.sleep(3);
-			System.out.println("woke up");
+			//System.out.println("woke up");
 			// get input from console
 			Scanner scanner = new Scanner(System.in);
 
