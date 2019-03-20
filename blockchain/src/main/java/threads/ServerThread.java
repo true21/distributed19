@@ -478,14 +478,18 @@ public class ServerThread extends Thread {
             if (message.getType().equals("blockchainDone")) {
               // do that
               s_cli.close();
-              System.out.println("it works");
+              //System.out.println("it works");
               if (blockchain.getBlockchain().size() < message.getBlockchain().getBlockchain().size()) {
                 blockchain = message.getBlockchain();
                 //System.out.println("found bigger");
               }
               else if (blockchain.getBlockchain().size() == message.getBlockchain().getBlockchain().size()) {
-                int comp_str = blockchain.getBlockchain().toString().compareTo(message.getBlockchain().toString());
-                if (comp_str > 0) {
+                //int comp_str = blockchain.getBlockchain().toString().compareTo(message.getBlockchain().toString());
+                //if (comp_str > 0) {
+                String myhash = blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1).getHash();
+                String yourhash = message.getBlockchain().getBlockchain().get(message.getBlockchain().getBlockchain().size()-1).getHash();
+                int comp_str = myhash.compareTo(yourhash);
+                if(comp_str > 0){
                   blockchain = message.getBlockchain();
                   //System.out.println("found better");
                 }

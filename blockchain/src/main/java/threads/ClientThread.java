@@ -127,7 +127,7 @@ public class ClientThread extends Thread {
 
 			if(index==0){
 				//System.out.println("Sleeping..");
-				TimeUnit.SECONDS.sleep(50);
+				TimeUnit.SECONDS.sleep(60);
 				System.out.println("File read");
 				for (int i=1; i<nodes.size(); i++) {
 						//System.out.println("Connecting7 to " + 11000 + i);
