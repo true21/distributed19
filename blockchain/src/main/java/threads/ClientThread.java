@@ -65,7 +65,41 @@ public class ClientThread extends Thread {
 			InetAddress ip = nodes.get(index).getIP();
 			int port = nodes.get(index).getPort();
 
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			ObjectOutputStream oos21 = new ObjectOutputStream(bout);
+			ObjectInputStream ois21 = new ObjectInputStream(new ByteArrayInputStream(bout.toByteArray()));
 
+			List<ObjectOutputStream> outputs21 = new ArrayList<ObjectOutputStream>();
+			List<ObjectInputStream> inputs21 = new ArrayList<ObjectInputStream>();
+
+			if(index==0){
+				//System.out.println("Sleeping..");
+				TimeUnit.MILLISECONDS.sleep(500);
+				//System.out.println("File read");
+				for (int i=1; i<nodes.size(); i++) {
+						//System.out.println("Connecting7 to " + 11000 + i);
+						Socket s_ready = new Socket(nodes.get(i).getIP(), 14000 + i);
+						oos21 = new ObjectOutputStream(s_ready.getOutputStream());
+						ois21 = new ObjectInputStream(s_ready.getInputStream());
+						outputs21.add(oos21);
+						inputs21.add(ois21);
+						//System.out.println("Connected8");
+						//s_ready.close();
+				}
+			}
+			else {
+				ServerSocket ss_readyy = new ServerSocket(14000 + index);
+				//System.out.println("File read");
+				// be notified when you're ready to go
+	      Socket s_readyy = ss_readyy.accept();
+				oos21 = new ObjectOutputStream(s_readyy.getOutputStream());
+				//oos21.writeObject(mes);
+				ois21 = new ObjectInputStream(s_readyy.getInputStream());
+				//String str = (String) ois21.readObject();
+				//System.out.println("Accepting10");
+				//s_readyy.close();
+				//ss_readyy.close();
+			}
 
 			// send 100 noobcash coins to others if Bootstrap
 			if (index == 0) {
@@ -122,28 +156,26 @@ public class ClientThread extends Thread {
 				String transMsg = (String) ois.readObject();
 				//System.out.println(transMsg);
 				s.close();
-				TimeUnit.MILLISECONDS.sleep(500);
+				TimeUnit.MILLISECONDS.sleep(700);
   		}
 
+			System.out.println("Read file");
+
 			if(index==0){
-				//System.out.println("Sleeping..");
-				TimeUnit.SECONDS.sleep(60);
-				System.out.println("File read");
-				for (int i=1; i<nodes.size(); i++) {
-						//System.out.println("Connecting7 to " + 11000 + i);
-						Socket s_ready = new Socket(nodes.get(i).getIP(), 11000 + i);
-						//System.out.println("Connected8");
-						s_ready.close();
+				for (int i=0; i<n-1; i++) {
+					String someMsg = (String) inputs21.get(i).readObject();
+					System.out.println("Read " + i);
+				}
+				for (int i=0; i<n-1; i++) {
+					outputs21.get(i).writeObject("go on");
+					System.out.println("Wrote " + i);
 				}
 			}
 			else {
-				ServerSocket ss_readyy = new ServerSocket(11000 + index);
-				System.out.println("File read");
-				// be notified when you're ready to go
-	      Socket s_readyy = ss_readyy.accept();
-				//System.out.println("Accepting10");
-				s_readyy.close();
-				ss_readyy.close();
+				oos21.writeObject("finished");
+				System.out.println("Wrote");
+				String someOtherMsg = (String) ois21.readObject();
+				System.out.println("Read");
 			}
 
 
@@ -161,6 +193,8 @@ public class ClientThread extends Thread {
 			//System.out.println("woke up");
 			// get input from console
 			Scanner scanner = new Scanner(System.in);
+
+			System.out.println("READY!");
 
 			// cli
 			while (true) {
