@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Blockchain will be part a node-miner. It should be able to be sent to
@@ -13,7 +14,7 @@ import java.util.List;
  */
 public class Blockchain implements Serializable {
 
-    private List<Block> blockchain = new ArrayList<Block>();
+    private CopyOnWriteArrayList<Block> blockchain = new CopyOnWriteArrayList<Block>();
     private int difficulty;
     private int maxTransactionInBlock;
     // in order to compile static - else Wallet.getBalance() problematic
@@ -29,7 +30,7 @@ public class Blockchain implements Serializable {
      return this.minimumTransaction;
    }
 
-   public List<Block> getBlockchain() {
+   public CopyOnWriteArrayList<Block> getBlockchain() {
      return this.blockchain;
    }
 
@@ -116,7 +117,7 @@ public class Blockchain implements Serializable {
     					tempOutput = tempUTXOs.get(input.transactionOutputId);
 
     					if(tempOutput == null) {
-    						System.out.println("#Referenced input on Transaction(" + t + ") is Missing");
+    						System.out.println("#Referenced input on Transaction(" + t + ") is Missing, Block: " + i);
     						return false;
     					}
 
@@ -125,11 +126,13 @@ public class Blockchain implements Serializable {
     						return false;
     					}
 
+              System.out.println("------------------- Removing input: " + input.transactionOutputId);
     					tempUTXOs.remove(input.transactionOutputId);
     				}
 
     				for(TransactionOutput output: currentTransaction.transaction_outputs) {
     					tempUTXOs.put(output.id, output);
+              System.out.println("------------------- Adding input: " + output.id);
     				}
 
     				if( currentTransaction.getTransOut().get(0).reciepient != currentTransaction.getRecAddr()) {

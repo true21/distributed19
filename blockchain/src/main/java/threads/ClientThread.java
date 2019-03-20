@@ -43,10 +43,10 @@ public class ClientThread extends Thread {
 			System.out.println("Listening1 to " + 11000 + index);
       Socket s_nodeId = ss.accept();
 			System.out.println("Accepting2");
-			ObjectInputStream ois = new ObjectInputStream(s_nodeId.getInputStream());
+			ObjectInputStream ois1 = new ObjectInputStream(s_nodeId.getInputStream());
 			Node temp_node;
 			for (int i=0; i<n; i++) {
-				temp_node = (Node) ois.readObject();
+				temp_node = (Node) ois1.readUnshared();
 				nodes.add(temp_node);
 			}
 			//System.out.println("hey with listsize " + nodes.size());
@@ -65,7 +65,16 @@ public class ClientThread extends Thread {
 			InetAddress ip = nodes.get(index).getIP();
 			int port = nodes.get(index).getPort();
 
+			ServerSocket sso = new ServerSocket(11000 + index);
+			System.out.println("Acceptin my server");
+			Socket so = sso.accept();
+			System.out.println("Accepted my server");
+			ObjectOutputStream oos = new ObjectOutputStream(so.getOutputStream());
 
+			TimeUnit.MILLISECONDS.sleep(100);
+
+			Socket so21 = new Socket(ip, 11500 + index);
+			ObjectInputStream ois = new ObjectInputStream(so21.getInputStream());
 
 			// send 100 noobcash coins to others if Bootstrap
 			if (index == 0) {
@@ -73,14 +82,9 @@ public class ClientThread extends Thread {
 					String tr100 = "t ";
 					tr100 += i + " 100";
 					Message mes = new Message(tr100);
-					System.out.println("Connecting5 to " + port);
-					Socket s100 = new Socket(ip, port);
-					System.out.println("Connected6");
-					ObjectOutputStream oos = new ObjectOutputStream(s100.getOutputStream());
-					oos.writeObject(mes);
-					ObjectInputStream ms = new ObjectInputStream(s100.getInputStream());
-					String str = (String) ms.readObject();
-					s100.close();
+					oos.writeUnshared(mes);
+					System.out.println("sent 100, times: " + i);
+					String str = (String) ois.readUnshared();
 					//oos.close();
 				}
 				// say to others client's that they're ready to go
@@ -102,26 +106,24 @@ public class ClientThread extends Thread {
 				ss_readyy.close();
 			}*/
 			// be notified that 100 nbc coins have arrived everywhere
-			ServerSocket ss_readyy2 = new ServerSocket(11000 + index);
+			ServerSocket ss_readyy2 = new ServerSocket(12000 + index);
 			Socket s_readyy2 = ss_readyy2.accept();
-			s_readyy2.close();
-			ss_readyy2.close();
+			//s_readyy2.close();
+			//ss_readyy2.close();
+			System.out.println("100 coins delivered");
 
 			// file
 			String file = "../../resources/main/transactions/" + n + "nodes/transactions" + index + ".txt";
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line;
   		while ((line = br.readLine()) != null) {
-				Socket s = new Socket(ip, port);
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				String toSend = "t " + line.replace("id", "");
+				//System.out.println(toSend);
 				Message message = new Message(toSend);
-				oos.writeObject(message);
-				ois = new ObjectInputStream(s.getInputStream());
-				String transMsg = (String) ois.readObject();
+				oos.writeUnshared(message);
+				String transMsg = (String) ois.readUnshared();
 				System.out.println(transMsg);
-				s.close();
-				TimeUnit.MILLISECONDS.sleep(300);
+				//TimeUnit.MILLISECONDS.sleep(300);
   		}
 
 			// get input from console
@@ -132,9 +134,6 @@ public class ClientThread extends Thread {
 				// read line
 				String command = scanner.nextLine();
 				System.out.println("Connecting21 to " + port);
-				Socket s = new Socket(ip, port);
-				System.out.println("Connected22");
-				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 				String sendToServer = new String("");
 				String help = "explain stuff";
 				String error = "Bad syntax.";
@@ -160,43 +159,31 @@ public class ClientThread extends Thread {
 					System.out.println(error);
 					System.out.println(help);
 					Message message = new Message("help");
-					oos.writeObject(message);
-					if(s.getInputStream().read()==-1){
-						s.close();
-					}
+					oos.writeUnshared(message);
 				}
 				else if (sendToServer.equals("help")) {
 					System.out.println(help);
 					Message message = new Message("help");
-					oos.writeObject(message);
-					if(s.getInputStream().read()==-1){
-						s.close();
-					}
+					oos.writeUnshared(message);
 				}
 				else {
 					Message message = new Message(sendToServer);
-					oos.writeObject(message);
-					ois = new ObjectInputStream(s.getInputStream());
+					oos.writeUnshared(message);
 					if (sendToServer.equals("balance")) {
 						// balance
-						System.out.println("bal reading");
-						String balance_str = (String) ois.readObject();
+						String balance_str = (String) ois.readUnshared();
 						float balance = Float.parseFloat(balance_str);
-						System.out.println("bal read");
 						System.out.println("Your wallet's balance is: " + balance + " noobcash coins.");
-						s.close();
 					}
 					else if (sendToServer.equals("view")) {
 						// view
-						String view = (String) ois.readObject();
+						String view = (String) ois.readUnshared();
 						System.out.println("The last block's transactions are:\n" + view);
-						s.close();
 					}
 					else {
 						// transaction
-						String transMsg = (String) ois.readObject();
+						String transMsg = (String) ois.readUnshared();
 						System.out.println(transMsg);
-						s.close();
 					}
 				}
 			}

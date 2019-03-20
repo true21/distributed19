@@ -5,6 +5,8 @@ import utilities.StringUtilities;
 import java.io.Serializable;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -90,10 +92,15 @@ public class Transaction implements Serializable {
         return false;
       }
 
+      boolean abe = false;
       //gather transaction inputs (Make sure they are unspent):
       for(TransactionInput i : transaction_inputs) {
         i.UTXO = blockchain.getUTXOs().get(i.transactionOutputId);
+        System.out.println("------------------------------- The input: " + i.transactionOutputId + " gets value: " + i.UTXO);
+        abe = true;
       }
+
+      if (!abe) System.out.println("BBBBBBBBBBB");
 
       //check if transaction is valid:
       if(getInputsValue() < blockchain.getMinimumTransaction()) {
@@ -101,6 +108,7 @@ public class Transaction implements Serializable {
         return false;
       }
 
+      transaction_outputs = new ArrayList<TransactionOutput>();
       //generate transaction outputs:
       float leftOver = getInputsValue() - value; //get value of inputs then the left over change:
       transaction_id = calulateHash();
@@ -148,6 +156,44 @@ public class Transaction implements Serializable {
       float total = 0;
       for(TransactionOutput o : transaction_outputs) {
         total += o.value;
+      }
+      return total;
+    }
+
+    public boolean fixInputs(Blockchain blockchain) {
+      System.out.println("Sender's balance is: " + getWalletBalance(blockchain, sender_address) + ", and he wants to send: " + value);
+
+      if(getWalletBalance(blockchain, sender_address) < value) { //gather balance and check funds.
+        System.out.println("#Sender has not enough funds to send transaction. Transaction Discarded.");
+        return false;
+      }
+      System.out.println("#Enough funds to send transaction. Transaction not Discarded.");
+      //create array list of inputs
+      ArrayList<TransactionInput> inputs = new ArrayList<TransactionInput>();
+
+      float total = 0;
+      for (Map.Entry<String, TransactionOutput> item: blockchain.getUTXOs().entrySet()) {
+        TransactionOutput UTXO = item.getValue();
+        if(UTXO.isMine(sender_address)) {
+          total += UTXO.value;
+          inputs.add(new TransactionInput(UTXO.id));
+          System.out.println("------------------------------------ Added input: " + UTXO.id);
+          if(total > value) break;
+        }
+      }
+
+      transaction_inputs = inputs;
+
+      return true;
+    }
+
+    public float getWalletBalance(Blockchain blockchain, PublicKey pk) {
+      float total = 0;
+      for (Map.Entry<String, TransactionOutput> item: blockchain.getUTXOs().entrySet()){
+        TransactionOutput UTXO = item.getValue();
+        if(UTXO.isMine(pk)) { //if output belongs to me ( if coins belong to me )
+          total += UTXO.value;
+        }
       }
       return total;
     }

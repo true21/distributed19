@@ -53,6 +53,10 @@ public class Message implements Serializable {
     return this.block;
   }
 
+  public void setBlock(Block blo) {
+    this.block = blo;
+  }
+
   public Blockchain getBlockchain() {
     return this.blockchain;
   }

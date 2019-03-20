@@ -9,6 +9,7 @@ import utilities.StringUtilities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.gson.Gson;
 
@@ -116,7 +117,7 @@ public class Block implements Serializable {
     	this.hash = hash;
     }
 
-  public boolean isValid(List<Block> blockchain){
+  public boolean isValid(CopyOnWriteArrayList<Block> blockchain){
     try{
       boolean valid = true;
 

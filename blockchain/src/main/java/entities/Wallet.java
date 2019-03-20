@@ -80,9 +80,12 @@ public class Wallet implements Serializable {
     }*/
 
     public float getBalance(Blockchain blockchain) {
+      UTXOs.clear();
       float total = 0;
+      System.out.println("------- HashMap Blockchain's UTXOs -------");
       for (Map.Entry<String, TransactionOutput> item: blockchain.getUTXOs().entrySet()){
         TransactionOutput UTXO = item.getValue();
+        System.out.println("------- " + UTXO.id + " -------");
         if(UTXO.isMine(publicKey)) { //if output belongs to me ( if coins belong to me )
           UTXOs.put(UTXO.id,UTXO); //add it to our list of unspent transactions.
           total += UTXO.value;
@@ -126,6 +129,7 @@ public class Wallet implements Serializable {
         TransactionOutput UTXO = item.getValue();
         total += UTXO.value;
         inputs.add(new TransactionInput(UTXO.id));
+        System.out.println("------------------------------------ Added input: " + UTXO.id);
         if(total > value) break;
       }
 
