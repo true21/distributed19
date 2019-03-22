@@ -130,7 +130,7 @@ public class ServerThread extends Thread {
                 Socket socket_boot = listener.accept();
                 //System.out.println("Accepting14");
                 sockets.add(socket_boot);
-                System.out.println("Spawning thread for bootstrap incoming communication " );
+                System.out.println("A new node has entered." );
                 //Thread t = new ServerThread(socket,"boot",InetAddress.getByName(args[0]),args[1]);
                 //ipAddress = InetAddress.getByName(args[0]);
                 //port = args[1];
@@ -144,7 +144,7 @@ public class ServerThread extends Thread {
                 ObjectOutputStream output = new ObjectOutputStream(socket_boot.getOutputStream());
                 outputs.add(output);
                 output.writeInt(node2.getIndex());
-                System.out.println("hey" + node2.getIndex());
+                //System.out.println("hey" + node2.getIndex());
                 //output.close();
                 //objectInputStream.close();
                 //t.start();
@@ -340,15 +340,16 @@ public class ServerThread extends Thread {
               //System.out.println("Sender is: " + sk2 + " and Receiver is: " + rk2);
               if (count100 == n-1) {
                 Socket s_ready2 = new Socket(nodes.get(miner.getIndex()).getIP(), 11000 + miner.getIndex());
-      					System.out.println("Connected100");
+      					//System.out.println("Connected100");
       					s_ready2.close();
                 count100++;
               }
               if (block.getTrans().size() == blockchain.getMaxTrans()) {
                 blockchain.addBlock(block, miner);
+                block.seq = blockchain.getBlockchain().size();
                 message = new Message("block", block);
                 Thread t = new ServerThread(n,"broadcast", message, block, blockchain, miner, nodes);
-                t.start();
+                //t.start();
                 //block.setPreviousHash(blockchain.getBlockchain().get(blockchain.getBlockchain().size()-1).getHash());
                 /*Thread t = new ServerThread(n,"aek", null, block, blockchain, miner, nodes);
                 //keepGoing = true;
@@ -365,11 +366,22 @@ public class ServerThread extends Thread {
               boolean isValid = blockchain.isValid();
               if (!isValid) {
                 blockchain.getBlockchain().remove(blockchain.getBlockchain().size()-1);
-                /*// consensus
-                Message cons_msg = new Message("consensus");
-                System.out.println("+++++++++++++++++++++++++++++++++FWNAZW CONSENSUS");
+                // consensus
+                if (message.getBlock().seq > blockchain.getBlockchain().size() + 1) {
+                  Message cons_msg = new Message("consensus");
+                  //System.out.println("+++++++++++++++++++++++++++++++++FWNAZW CONSENSUS");
+                  Thread t = new ServerThread(n,"broadcast", cons_msg, block, blockchain, miner, nodes);
+                  //t.start();
+                  /*for (int i=0; i<nodes.size(); i++) {
+                    Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
+                    oos = new ObjectOutputStream(s.getOutputStream());
+                    oos.writeObject(cons_msg);
+                  }*/
+                }/*
+                /*Message cons_msg = new Message("consensus");
+                //System.out.println("+++++++++++++++++++++++++++++++++FWNAZW CONSENSUS");
                 Thread t = new ServerThread(n,"broadcast", cons_msg, block, blockchain, miner, nodes);
-                t.start();*/
+                t.start();
                 /*for (int i=0; i<nodes.size(); i++) {
                   Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
                   oos = new ObjectOutputStream(s.getOutputStream());
@@ -522,7 +534,7 @@ public class ServerThread extends Thread {
       try{
         if (Case.equals("broadcast")) {
           for (int i=0; i<nodes.size(); i++) {
-            if (i == miner.getIndex()) continue;
+            if (i == miner.getIndex() || Msg.getType() == null) continue;
             Socket s = new Socket(nodes.get(i).getIP(), nodes.get(i).getPort());
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
             oos.writeObject(Msg);

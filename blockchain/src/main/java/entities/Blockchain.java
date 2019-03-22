@@ -88,7 +88,7 @@ public class Blockchain implements Serializable {
     			}
     			//compare previous hash and registered previous hash
     			if(!previousBlock.getHash().equals(currentBlock.getPreviousHash()) ) {
-    				System.out.println("#Previous Hashes not equal");
+    				//System.out.println("#Previous Hashes not equal");
     				return false;
     			}
     			//check if hash is solved
@@ -116,7 +116,7 @@ public class Blockchain implements Serializable {
     					tempOutput = tempUTXOs.get(input.transactionOutputId);
 
     					if(tempOutput == null) {
-    						System.out.println("#Referenced input on Transaction(" + t + ") is Missing");
+    						//System.out.println("#Referenced input on Transaction(" + t + ") is Missing");
     						return false;
     					}
 
@@ -144,7 +144,7 @@ public class Blockchain implements Serializable {
     			}
 
     		}
-    		System.out.println("Blockchain is valid");
+    		//System.out.println("Blockchain is valid");
     		return true;
      }
 /*

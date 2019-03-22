@@ -25,6 +25,7 @@ public class Block implements Serializable {
     private int nonce;
     private String hash;
     private String previousHash;
+    public int seq;
 
 
     // constructor for genesis block
@@ -71,11 +72,11 @@ public class Block implements Serializable {
 	    	if(success) {
           transaction.pT(blockchain);
 	    		transactions.add(transaction);
-	    		System.out.println("Transaction Successfully added to Block");
+	    		//System.out.println("Transaction Successfully added to Block");
           return true;
 	    	}
 	    	else {
-	    		System.out.println("Transaction failed to process. Discarded.");
+	    		//System.out.println("Transaction failed to process. Discarded.");
 	    		return false;
 	    	}
     	}
@@ -85,7 +86,7 @@ public class Block implements Serializable {
     		//mineBlock(this,diff);
     	}*/
       transactions.add(transaction);
-      System.out.println("Transaction Successfully added to Genesis Block");
+      //System.out.println("Transaction Successfully added to Genesis Block");
       return true;
     }
 

@@ -2,6 +2,7 @@ package beans;
 
 import java.io.Serializable;
 import entities.*;
+import utilities.*;
 
 /*
  * Todo : Message Class Contains anything that will be sent above the network
@@ -29,10 +30,6 @@ public class Message implements Serializable {
     this.blockchain = bc;
   }
 
-  public Message (String typ) {
-    this.type = typ;
-  }
-
   public String getType() {
     return this.type;
   }
@@ -55,6 +52,16 @@ public class Message implements Serializable {
 
   public Blockchain getBlockchain() {
     return this.blockchain;
+  }
+
+  public Message (String typ) {
+    this.transaction = new Transaction(null,null,0,null);
+    if (typ.startsWith("t id")) {
+      typ = typ.replace("id","");
+      this.transaction.formatTransaction(typ);
+    }
+    this.transaction = null;
+    this.type = typ;
   }
 
 }

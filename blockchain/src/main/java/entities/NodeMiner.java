@@ -64,7 +64,7 @@ public class NodeMiner {
 	        		break;
 	    	}
 	    	newBlock.setHash(hash);
-	    	System.out.println("Block Mined!!! : " + hash);
+	    	//System.out.println("Block Mined!!! : " + hash);
 	    	//broadcastBlock(newBlock);
 			}  catch (Exception e) { e.printStackTrace();}
     }

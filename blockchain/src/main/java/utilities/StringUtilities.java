@@ -69,5 +69,4 @@ public class StringUtilities {
       return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 
-
 }

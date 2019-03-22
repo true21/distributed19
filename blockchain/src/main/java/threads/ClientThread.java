@@ -149,14 +149,13 @@ public class ClientThread extends Thread {
   		while ((line = br.readLine()) != null) {
 				Socket s = new Socket(ip, port);
 				ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-				String toSend = "t " + line.replace("id", "");
+				String toSend = "t " + line;
 				Message message = new Message(toSend);
 				oos.writeObject(message);
 				ois = new ObjectInputStream(s.getInputStream());
 				String transMsg = (String) ois.readObject();
 				//System.out.println(transMsg);
 				s.close();
-				TimeUnit.MILLISECONDS.sleep(700);
   		}
 
 			System.out.println("Read file");
@@ -164,19 +163,21 @@ public class ClientThread extends Thread {
 			if(index==0){
 				for (int i=0; i<n-1; i++) {
 					String someMsg = (String) inputs21.get(i).readObject();
-					System.out.println("Read " + i);
+					//System.out.println("Read " + i);
 				}
 				for (int i=0; i<n-1; i++) {
 					outputs21.get(i).writeObject("go on");
-					System.out.println("Wrote " + i);
+					//System.out.println("Wrote " + i);
 				}
 			}
 			else {
 				oos21.writeObject("finished");
-				System.out.println("Wrote");
+				//System.out.println("Wrote");
 				String someOtherMsg = (String) ois21.readObject();
-				System.out.println("Read");
+				//System.out.println("Read");
 			}
+
+
 
 
 			Message endmes = new Message("allDone");
@@ -189,12 +190,11 @@ public class ClientThread extends Thread {
 				ends.close();
 			}
 			//System.out.println("Sleeping..");
-			TimeUnit.SECONDS.sleep(3);
 			//System.out.println("woke up");
 			// get input from console
 			Scanner scanner = new Scanner(System.in);
 
-			System.out.println("READY!");
+			//System.out.println("READY!");
 
 			// cli
 			while (true) {
